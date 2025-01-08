@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о человеке</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            color: #555;
+        }
+
+        div {
+            margin-bottom: 20px;
+        }
+
+        a, span {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 20px;
+        }
+
+        p {
+            font-style: italic;
+        }
+
+        form {
+            margin-top: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Информация о человеке</h1>
+
+<div>
+    <span th:text="${keyPersonById.getFullName()} + ', ' + ${keyPersonById.getBirthYear()}">
+        ФИО, Год рождения
+    </span>
+</div>
+
+<div th:if="${#lists.isEmpty(books)}">
+    <p>Человек пока не взял ни одной книги</p>
+</div>
+
+<div th:unless="${#lists.isEmpty(books)}">
+    <div>
+        <h2>Книги:</h2>
+        <span th:each="book : ${books}"
+              th:text="'Название книги: ' + ${book.title} + ', Автор: ' + ${book.author} + ', Год: ' + ${book.year} + '; '">
+            Название книги, Автор, Год;
+        </span>
+    </div>
+</div>
+
+<form th:method="get" th:action="@{/people/edit/{id}(id=${keyPersonById.getId()})}">
+    <input type="submit" value="Редактировать">
+</form>
+
+<form th:method="post" th:action="@{/people/delete/{id}(id=${keyPersonById.getId()})}">
+    <input type="submit" value="Удалить">
+</form>
+
+</body>
+</html>

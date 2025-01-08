@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о книге</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h2, h1 {
+            color: #444;
+        }
+
+        div {
+            margin-bottom: 20px;
+        }
+
+        a, span {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        p {
+            font-style: italic;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button, input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <span th:text="${keyBookById.getTitle()} + ', ' + ${keyBookById.getAuthor()} + ', ' + ${keyBookById.getYear()}">
+        Название книги, Автор книги, Год издания
+    </span>
+</div>
+
+<!-- Если книга уже назначена -->
+<div th:if="${keyBookById.ownerId != 0}">
+    <p><strong>Книга сейчас у:</strong> <span th:text="${owner.fullName}">Имя человека</span></p>
+    <form th:method="post"
+          th:action="@{/books/loose/{id}(id=${keyBookById.getId()})}">
+        <input type="submit" value="Освободить книгу">
+    </form>
+</div>
+
+<!-- Если книга свободна -->
+<div th:if="${keyBookById.ownerId == 0}">
+    <h2>Эта книга сейчас свободна. Кому ее назначить?</h2>
+    <form th:action="@{'/books/assign/' + ${keyBookById.id}}" method="post">
+        <label for="personId">Выберите человека:</label>
+        <select id="personId" name="personId">
+            <option th:each="person : ${people}"
+                    th:value="${person.id}"
+                    th:text="${person.fullName}">
+                Человек
+            </option>
+        </select>
+        <button type="submit">Назначить книгу</button>
+    </form>
+</div>
+
+<form th:method="get"
+      th:action="@{/books/edit/{id}(id=${keyBookById.getId()})}">
+    <input type="submit" value="Редактировать">
+</form>
+
+<form th:method="post"
+      th:action="@{/books/delete/{id}(id=${keyBookById.getId()})}">
+    <input type="submit" value="Удалить">
+</form>
+
+</body>
+</html>
