@@ -19,7 +19,7 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan(basePackages = {"controllers", "dao"})
+@ComponentScan(basePackages = {"site.javadev.controllers", "site.javadev.dao"})
 @PropertySource("classpath:db.properties")
 @EnableWebMvc
 public class SpringConfig implements WebMvcConfigurer {
