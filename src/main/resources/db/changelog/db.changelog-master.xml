@@ -6,8 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <include file="classpath:db/migration/V1__Create_Person_Table.sql"/>
-    <include file="classpath:db/migration/V2__Create_Books_Table.sql"/>
+    <include file="classpath:db/migration/V1__Create_Table.sql"/>
 
     <changeSet id="1" author="yourname">
         <createTable tableName="users">
