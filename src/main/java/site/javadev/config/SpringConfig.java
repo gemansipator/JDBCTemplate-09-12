@@ -37,7 +37,7 @@ public class SpringConfig implements WebMvcConfigurer {
     public SpringResourceTemplateResolver templateResolver() {
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
         templateResolver.setApplicationContext(applicationContext);
-        templateResolver.setPrefix("/WEB-INF/views/");
+        templateResolver.setPrefix("/WEB-INF/");
         templateResolver.setSuffix(".html");
         templateResolver.setCharacterEncoding("UTF-8");
         return templateResolver;
@@ -62,16 +62,18 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        String driver = env.getProperty("driver");
-        String password = env.getProperty("password");
-        String username = env.getProperty("username");
-        String url = env.getProperty("url");
-        dataSource.setDriverClassName(driver);
-        dataSource.setUsername("projekt2_user");
-        dataSource.setPassword(password);
-        dataSource.setUrl(url);
+        dataSource.setDriverClassName("org.postgresql.Driver");
+        dataSource.setUsername("postgres");
+        dataSource.setPassword("postgres");
+        dataSource.setUrl("jdbc:postgresql://localhost:5432/postgresJDBCprob");
         return dataSource;
     }
+    /**
+     * spring.datasource.url=jdbc:postgresql://localhost:5432/postgresJDBCprob
+     * spring.datasource.username=postgres
+     * spring.datasource.password=postgres
+     * spring.datasource.driver-class-name=org.postgresql.Driver
+     * spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect*/
 
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
