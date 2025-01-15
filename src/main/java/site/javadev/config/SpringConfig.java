@@ -33,13 +33,6 @@ public class SpringConfig implements WebMvcConfigurer {
         this.applicationContext = applicationContext;
         this.env = environment;
     }
-    @Bean
-    public SpringLiquibase liquibase(DataSource dataSource) {
-        SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setDataSource(dataSource);
-        liquibase.setChangeLog("classpath:db/changelog/db.changelog-master.xml"); // Путь к вашему changelog
-        return liquibase;
-    }
 
 
 
@@ -78,12 +71,7 @@ public class SpringConfig implements WebMvcConfigurer {
         dataSource.setUrl("jdbc:postgresql://localhost:5432/postgresJDBCprob");
         return dataSource;
     }
-    /**
-     * spring.datasource.url=jdbc:postgresql://localhost:5432/postgresJDBCprob
-     * spring.datasource.username=postgres
-     * spring.datasource.password=postgres
-     * spring.datasource.driver-class-name=org.postgresql.Driver
-     * spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect*/
+
 
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {

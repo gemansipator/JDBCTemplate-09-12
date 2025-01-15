@@ -34,11 +34,7 @@
       <artifactId>liquibase-core</artifactId>
       <version>4.10.0</version> <!-- Убедитесь, что версия актуальна -->
     </dependency>
-    <!-- PostgreSQL Driver -->
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-    </dependency>
+
 
 
 
