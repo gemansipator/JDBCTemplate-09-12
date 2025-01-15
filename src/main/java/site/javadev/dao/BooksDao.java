@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-
 @Getter
 @Repository
 public class BooksDao {
@@ -28,7 +27,7 @@ public class BooksDao {
     //получение всех книг
     public List<Books> getAllBooks() {
         try {
-            String sql = "SELECT * FROM book";
+            String sql = "SELECT * FROM books";  // изменено на 'books'
             return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Books.class));
         } catch (Exception e) {
             logger.error("Ошибка при получении списка всех книг", e);
@@ -37,7 +36,7 @@ public class BooksDao {
     }
 
     public void saveBooks(@Valid Books books) {
-        String sql = "INSERT INTO book (title, author, year, owner) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO books (title, author, year, owner) VALUES (?, ?, ?, ?)";  // изменено на 'books'
 
         try {
             // Устанавливаем значение owner в NULL, если оно отсутствует
@@ -51,7 +50,7 @@ public class BooksDao {
     //получение объекта book по id
     public Books getBookById(long id) {
         try {
-            String sql = "SELECT id, title, author, year, owner AS ownerId FROM book WHERE id = ?";
+            String sql = "SELECT id, title, author, year, owner AS ownerId FROM books WHERE id = ?";  // изменено на 'books'
 
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
                 Books book = new Books();
@@ -73,7 +72,7 @@ public class BooksDao {
     //обновление объекта book
     public void updateBook(@Valid Books bookFromForm) {
         try {
-            String sql = "UPDATE book SET title = ?, author = ?, year = ? WHERE id = ?";
+            String sql = "UPDATE books SET title = ?, author = ?, year = ? WHERE id = ?";  // изменено на 'books'
             jdbcTemplate.update(sql, bookFromForm.getTitle(), bookFromForm.getAuthor(), bookFromForm.getYear(), bookFromForm.getId());
         } catch (Exception e) {
             logger.error("Ошибка при обновлении объекта book", e);
@@ -84,7 +83,7 @@ public class BooksDao {
     //удаление объекта book
     public void deleteBook(long id) {
         try {
-            String sql = "DELETE FROM book WHERE id = ?";
+            String sql = "DELETE FROM books WHERE id = ?";  // изменено на 'books'
             jdbcTemplate.update(sql, id);
         } catch (Exception e) {
             logger.error("Ошибка при удалении объекта book", e);
@@ -95,7 +94,7 @@ public class BooksDao {
     // назначение книги читателю
     public void assignBookToPerson(long bookId, Person person) {
         try {
-            String updateQuery = "UPDATE book SET owner = ? WHERE id = ?";
+            String updateQuery = "UPDATE books SET owner = ? WHERE id = ?";  // изменено на 'books'
             int rowsAffected = jdbcTemplate.update(updateQuery, person.getId(), bookId);
 
             if (rowsAffected == 0) {
@@ -110,7 +109,7 @@ public class BooksDao {
     // удаляем книгу у читателя
     public void removeBookOwner(long bookId) {
         try {
-            String sql = "UPDATE book SET owner = NULL WHERE id = ?";
+            String sql = "UPDATE books SET owner = NULL WHERE id = ?";  // изменено на 'books'
             int rowsAffected = jdbcTemplate.update(sql, bookId);
 
             if (rowsAffected == 0) {
