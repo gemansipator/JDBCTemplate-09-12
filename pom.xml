@@ -9,12 +9,39 @@
   <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <sping.version>6.1.5</sping.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
+
+      <liquibase.url>jdbc:postgresql://localhost:5432/your_database</liquibase.url>
+      <liquibase.username>postgres</liquibase.username>
+      <liquibase.password>postgres</liquibase.password>
+      <liquibase.driver>org.postgresql.Driver</liquibase.driver>
     </properties>
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.16</version>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+      <version>4.10.0</version> <!-- Убедитесь, что версия актуальна -->
+    </dependency>
+    <!-- PostgreSQL Driver -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
+
+
     <!--  https://mvnrepository.com/artifact/org.springframework/spring-core  -->
     <dependency>
       <groupId>org.springframework</groupId>
@@ -103,5 +130,20 @@
 
   <build>
     <finalName>JDBCTemplate-09-12</finalName>
+    <plugins>
+      <!-- Liquibase Maven Plugin for database migrations -->
+      <plugin>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <version>4.10.0</version> <!-- Use the correct version -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>clearCheckSums</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
