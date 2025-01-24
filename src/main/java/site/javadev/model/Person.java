@@ -23,7 +23,7 @@ public class Person {
     @Max(value = java.time.Year.MAX_VALUE, message = "Год рождения не должен быть в будущем")
     private int birthYear; // Год рождения
 
-    private List<Books> books; // Список книг, принадлежащих человеку
+    private List<Book> books; // Список книг, принадлежащих человеку
 
     public long getId() {
         return id;
@@ -49,11 +49,11 @@ public class Person {
         this.birthYear = birthYear;
     }
 
-    public List<Books> getBooks() {
+    public List<Book> getBooks() {
         return books;
     }
 
-    public void setBooks(List<Books> books) {
+    public void setBooks(List<Book> books) {
         this.books = books;
     }
 }

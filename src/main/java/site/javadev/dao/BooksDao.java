@@ -1,6 +1,6 @@
 package site.javadev.dao;
 
-import site.javadev.model.Books;
+import site.javadev.model.Book;
 import site.javadev.model.Person;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -25,17 +25,17 @@ public class BooksDao {
     }
 
     //получение всех книг
-    public List<Books> getAllBooks() {
+    public List<Book> getAllBooks() {
         try {
             String sql = "SELECT * FROM books";  // изменено на 'books'
-            return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Books.class));
+            return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Book.class));
         } catch (Exception e) {
             logger.error("Ошибка при получении списка всех книг", e);
             throw new RuntimeException(e);
         }
     }
 
-    public void saveBooks(@Valid Books books) {
+    public void saveBooks(@Valid Book books) {
         String sql = "INSERT INTO books (title, author, year, owner) VALUES (?, ?, ?, ?)";  // изменено на 'books'
 
         try {
@@ -48,12 +48,12 @@ public class BooksDao {
     }
 
     //получение объекта book по id
-    public Books getBookById(long id) {
+    public Book getBookById(long id) {
         try {
             String sql = "SELECT id, title, author, year, owner AS ownerId FROM books WHERE id = ?";  // изменено на 'books'
 
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-                Books book = new Books();
+                Book book = new Book();
                 book.setId(rs.getLong("id"));
                 book.setTitle(rs.getString("title"));
                 book.setAuthor(rs.getString("author"));
@@ -70,7 +70,7 @@ public class BooksDao {
     }
 
     //обновление объекта book
-    public void updateBook(@Valid Books bookFromForm) {
+    public void updateBook(@Valid Book bookFromForm) {
         try {
             String sql = "UPDATE books SET title = ?, author = ?, year = ? WHERE id = ?";  // изменено на 'books'
             jdbcTemplate.update(sql, bookFromForm.getTitle(), bookFromForm.getAuthor(), bookFromForm.getYear(), bookFromForm.getId());
