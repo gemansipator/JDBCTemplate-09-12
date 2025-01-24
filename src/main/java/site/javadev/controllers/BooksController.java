@@ -2,7 +2,7 @@ package site.javadev.controllers;
 
 import site.javadev.dao.BooksDao;
 import site.javadev.dao.PersonDao;
-import site.javadev.model.Books;
+import site.javadev.model.Book;
 import site.javadev.model.Person;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class BooksController {
     @GetMapping
     public String getAllBooks(Model model) {
         try {
-            List<Books> allBooks = booksDao.getAllBooks();
+            List<Book> allBooks = booksDao.getAllBooks();
             model.addAttribute("keyAllBooks", allBooks);
             return "books/view-with-all-books"; // Возвращаем имя шаблона
         } catch (Exception e) {
@@ -42,13 +42,13 @@ public class BooksController {
     // Создание новой книги (GET)
     @GetMapping("/new")
     public String giveToUserPageToCreateNewBook(Model model) {
-        model.addAttribute("keyOfNewBook", new Books());
+        model.addAttribute("keyOfNewBook", new Book());
         return "books/view-to-create-new-book";
     }
 
     // Создание новой книги (POST)
     @PostMapping
-    public String createBook(@ModelAttribute("keyOfNewBook") @Valid Books books, BindingResult bindingResult) {
+    public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book books, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "books/view-to-create-new-book";
         }
@@ -63,7 +63,7 @@ public class BooksController {
     // Получение книги по id (GET)
     @GetMapping("/{id}")
     public String getBookById(@PathVariable("id") long id, Model model) {
-        Books bookById = booksDao.getBookById(id);
+        Book bookById = booksDao.getBookById(id);
         model.addAttribute("keyBookById", bookById);
         if (bookById.getOwnerId() != 0) {
             Person owner = personDao.getPersonById(bookById.getOwnerId());
@@ -76,14 +76,14 @@ public class BooksController {
     // Редактирование книги по id (GET)
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable("id") long id, Model model) {
-        Books bookToBeEdited = booksDao.getBookById(id);
+        Book bookToBeEdited = booksDao.getBookById(id);
         model.addAttribute("Book", bookToBeEdited);
         return "books/view-to-edit-book";
     }
 
     // Редактирование книги (POST)
     @PostMapping("/edit/{id}")
-    public String editBook(@PathVariable("id") long id, @ModelAttribute("keyOfBookToBeEdited") @Valid Books bookFromForm, BindingResult bindingResult) {
+    public String editBook(@PathVariable("id") long id, @ModelAttribute("keyOfBookToBeEdited") @Valid Book bookFromForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "books/view-to-edit-book";
         }

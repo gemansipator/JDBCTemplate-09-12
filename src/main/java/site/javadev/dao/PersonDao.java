@@ -1,6 +1,6 @@
 package site.javadev.dao;
 
-import site.javadev.model.Books;
+import site.javadev.model.Book;
 import site.javadev.model.Person;
 import jakarta.validation.Valid;
 
@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.awt.print.Book;
 import java.util.List;
 
 @Getter
@@ -61,7 +60,7 @@ public class PersonDao{
 
             if (person != null) {
                 String booksSql = "SELECT * FROM book WHERE owner = ?";
-                List<Books> listBooks = jdbcTemplate.query(booksSql, new BeanPropertyRowMapper<>(Books.class), id);
+                List<Book> listBooks = jdbcTemplate.query(booksSql, new BeanPropertyRowMapper<>(Book.class), id);
                 person.setBooks(listBooks);
             }
 
