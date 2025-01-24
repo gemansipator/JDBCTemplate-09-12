@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
+      <version>42.7.5</version> <!-- Используем актуальную версию -->
     </dependency>
     <dependency>
       <groupId>org.hibernate.validator</groupId>
@@ -106,9 +106,40 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <version>6.1.0-M2</version>
+      <version>6.1.0</version> <!-- Используем одну версию -->
       <scope>provided</scope>
     </dependency>
+
+    <!-- Spring Security -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+      <version>5.8.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-config</artifactId>
+      <version>5.8.1</version>
+    </dependency>
+
+    <!-- Jakarta Persistence (JPA) -->
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version> <!-- Используем актуальную версию -->
+    </dependency>
+
+    <!-- Spring Boot Starter Data JPA -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <version>3.4.2</version>
+    </dependency>
+
+    <!-- Удаляем дублирующие зависимости -->
+    <!-- Удаляем старые зависимости, которые уже указаны выше: -->
+    <!-- org.postgresql:postgresql:42.7.3 -->
+    <!-- jakarta.servlet:jakarta.servlet-api:6.1.0-M2 -->
   </dependencies>
 
   <build>
