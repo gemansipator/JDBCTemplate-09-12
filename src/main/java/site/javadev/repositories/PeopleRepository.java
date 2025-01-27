@@ -1,6 +1,6 @@
 package site.javadev.repositories;
 
-import site.javadev.model.PersonSecurity;
+import site.javadev.Model.PersonSecurity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

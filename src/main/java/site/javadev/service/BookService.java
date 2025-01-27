@@ -1,10 +1,9 @@
 package site.javadev.service;
 
-import org.springframework.stereotype.Service;
-import site.javadev.model.Person;
+import site.javadev.Model.Book;
+import site.javadev.Model.Person;
 import site.javadev.repositories.BookRepository;
-import site.javadev.model.Book;
-
+import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service

@@ -1,35 +1,40 @@
 package site.javadev.service;
 
-import site.javadev.model.PersonSecurity;
+import site.javadev.Model.PersonSecurity;
 import site.javadev.repositories.PeopleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
+@RequiredArgsConstructor
 public class PeopleService {
     private final PeopleRepository peopleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public PeopleService(PeopleRepository peopleRepository, PasswordEncoder passwordEncoder) {
-        this.peopleRepository = peopleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-
+    // Сохранение нового пользователя с ролью "USER" по умолчанию
     public void savePerson(PersonSecurity personSecurity) {
-
         personSecurity.setPassword(passwordEncoder.encode(personSecurity.getPassword()));
         personSecurity.setRole("ROLE_USER");
-
         peopleRepository.save(personSecurity);
     }
 
+    // Изменение роли пользователя (только для ADMIN)
     @PreAuthorize("hasRole('ADMIN')")
-    public void doAdminSomething() {
-        System.out.println("Admin is doing something");
+    public void changeUserRole(String username, String role) {
+        PersonSecurity user = peopleRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
+
+        user.setRole(role);
+        peopleRepository.save(user);
     }
 
+    // Получение всех пользователей
+    public List<PersonSecurity> getAllUsers() {
+        return peopleRepository.findAll();
+    }
 }

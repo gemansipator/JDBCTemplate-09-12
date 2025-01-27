@@ -1,6 +1,6 @@
 package site.javadev.service;
 
-import site.javadev.model.Person;
+import site.javadev.Model.Person;
 import site.javadev.repositories.PersonRepository;
 import org.springframework.stereotype.Service;
 
