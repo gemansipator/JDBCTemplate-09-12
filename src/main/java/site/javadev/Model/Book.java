@@ -1,33 +1,29 @@
 package site.javadev.Model;
 
+import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
+import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
 
-import jakarta.persistence.*;
-import lombok.*;
-
-
-@Getter
-@Setter
-@Entity
-@Table(name = "book")
+@Getter // Генерация геттеров для всех полей
+@Setter // Генерация сеттеров для всех полей
+@Entity // Обозначает, что это сущность для JPA
+@Table(name = "book") // Указывает название таблицы в базе данных
 public class Book {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Id // Указывает, что это первичный ключ
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоматическая генерация значения ключа
+    @Column(name = "id") // Название столбца в базе данных
     private long id;
 
-    @Column(nullable = false)
-    private String title;
+    @Column(nullable = false) // Указывает, что поле не может быть пустым
+    private String title; // Название книги
 
-    @Column(nullable = false)
-    private String author;
+    @Column(nullable = false) // Указывает, что поле не может быть пустым
+    private String author; // Автор книги
 
-    @Column(nullable = false)
-    private int year;
+    @Column(nullable = false) // Указывает, что поле не может быть пустым
+    private int year; // Год издания книги
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id")
-    private Person owner;
-
-
+    @ManyToOne // Указывает связь "многие к одному" с сущностью Person
+    @JoinColumn(name = "owner_id") // Указывает, какой столбец в таблице связан с владельцем книги
+    private Person owner; // Владелец книги, связь с сущностью Person
 }
