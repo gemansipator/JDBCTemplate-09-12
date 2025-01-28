@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ панель</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .container {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+    h1, h2 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .message {
+      font-size: 0.9rem;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .message.success {
+      color: green;
+    }
+    .message.error {
+      color: red;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    label {
+      font-size: 0.9rem;
+      color: #555;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .logout {
+      text-align: center;
+    }
+    .logout a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Админ панель</h1>
+
+  <!-- Сообщения об успехе или ошибке -->
+  <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+
+  <!-- Таблица пользователей -->
+  <table>
+    <thead>
+    <tr>
+      <th>Имя пользователя</th>
+      <th>Роль</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+      <td th:text="${user.username}"></td>
+      <td th:text="${user.role}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Форма изменения роли -->
+  <h2>Изменить роль</h2>
+  <form th:action="@{/auth/admin/assign-role}" method="post">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+    <label for="username">Имя пользователя:</label>
+    <input type="text" name="username" id="username" required>
+
+    <label for="role">Новая роль:</label>
+    <select name="role" id="role" required>
+      <option value="ROLE_USER">USER</option>
+      <option value="ROLE_ADMIN">ADMIN</option>
+    </select>
+
+    <button type="submit">Изменить роль</button>
+  </form>
+</div>
+
+<!-- Кнопка для перенаправления на начальную страницу -->
+<div class="logout">
+  <a href="/">
+    <button type="button">Выход</button>
+  </a>
+</div>
+</body>
+</html>
