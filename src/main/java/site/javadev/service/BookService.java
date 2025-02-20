@@ -1,7 +1,7 @@
 package site.javadev.service;
 
-import site.javadev.Model.Book; // Импорт модели Book для работы с книгами
-import site.javadev.Model.Person; // Импорт модели Person для работы с людьми
+import site.javadev.model.Book; // Импорт модели Book для работы с книгами
+import site.javadev.model.Person; // Импорт модели Person для работы с людьми
 import site.javadev.repositories.BookRepository; // Импорт репозитория BookRepository для работы с базой данных
 import org.springframework.stereotype.Service; // Импорт аннотации Service для пометки класса как сервиса
 
