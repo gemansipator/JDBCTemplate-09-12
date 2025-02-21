@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository; // Импорт аннотац
 @Repository // Обозначает, что данный интерфейс является репозиторием для Spring Data JPA
 public interface BookRepository extends JpaRepository<Book, Long> { // Репозиторий для работы с сущностью Book
     // При необходимости можно добавить кастомные запросы
+
 }
