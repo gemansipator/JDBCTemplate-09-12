@@ -1,4 +1,4 @@
-package site.javadev.Model;
+package site.javadev.model;
 
 import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
 import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
@@ -20,8 +20,8 @@ public class Book {
     @Column(nullable = false) // Указывает, что поле не может быть пустым
     private String author; // Автор книги
 
-    @Column(nullable = false) // Указывает, что поле не может быть пустым
-    private int year; // Год издания книги
+    @Column(name = "publication_year", nullable = false) // Переименовал year -> publication_year
+    private int publicationYear;
 
     @ManyToOne // Указывает связь "многие к одному" с сущностью Person
     @JoinColumn(name = "owner_id") // Указывает, какой столбец в таблице связан с владельцем книги

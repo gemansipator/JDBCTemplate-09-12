@@ -1,7 +1,7 @@
-package site.javadev.Controllers;
+package site.javadev.controllers;
 
-import site.javadev.Model.Book;
-import site.javadev.Model.Person;
+import site.javadev.model.Book;
+import site.javadev.model.Person;
 import site.javadev.service.BookService;
 import site.javadev.service.PersonService;
 import jakarta.validation.Valid;

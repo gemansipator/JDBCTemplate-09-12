@@ -1,6 +1,6 @@
 package site.javadev.service;
 
-import site.javadev.Model.Person; // Импорт модели Person для работы с сущностью пользователя
+import site.javadev.model.Person; // Импорт модели Person для работы с сущностью пользователя
 import site.javadev.repositories.PersonRepository; // Импорт репозитория для работы с пользователями в базе данных
 import org.springframework.stereotype.Service; // Аннотация для пометки класса как сервиса в контексте Spring
 

@@ -1,6 +1,6 @@
 package site.javadev.validation;
 
-import site.javadev.Model.PersonSecurity;
+import site.javadev.model.PersonSecurity;
 import site.javadev.security.PersonDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,6 +1,6 @@
 package site.javadev.security;
 
-import site.javadev.Model.PersonSecurity; // Импорт модели PersonSecurity для работы с информацией пользователя
+import site.javadev.model.PersonSecurity; // Импорт модели PersonSecurity для работы с информацией пользователя
 import org.springframework.security.core.GrantedAuthority; // Импорт интерфейса для представления прав доступа
 import org.springframework.security.core.authority.SimpleGrantedAuthority; // Импорт реализации прав доступа
 import org.springframework.security.core.userdetails.UserDetails; // Импорт интерфейса для работы с деталями пользователя

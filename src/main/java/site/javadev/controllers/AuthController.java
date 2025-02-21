@@ -1,6 +1,6 @@
-package site.javadev.Controllers;
+package site.javadev.controllers;
 
-import site.javadev.Model.PersonSecurity;
+import site.javadev.model.PersonSecurity;
 import site.javadev.service.PeopleService;
 import site.javadev.validation.PersonValidator;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package site.javadev.security;
 
-import site.javadev.Model.PersonSecurity; // Импорт модели PersonSecurity для работы с данными пользователя
+import site.javadev.model.PersonSecurity; // Импорт модели PersonSecurity для работы с данными пользователя
 import site.javadev.repositories.PeopleRepository; // Импорт репозитория для работы с базой данных пользователей
 import lombok.RequiredArgsConstructor; // Импорт аннотации для автоматической генерации конструктора
 import org.springframework.security.core.userdetails.UserDetails; // Импорт интерфейса для работы с деталями пользователя

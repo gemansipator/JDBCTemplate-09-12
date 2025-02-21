@@ -1,4 +1,4 @@
-package site.javadev.Model;
+package site.javadev.model;
 
 import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
 import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
