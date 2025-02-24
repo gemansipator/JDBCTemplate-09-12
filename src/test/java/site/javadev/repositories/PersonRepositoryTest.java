@@ -17,6 +17,7 @@ public class PersonRepositoryTest {
     @Autowired
     private PersonRepository personRepository;
 
+    @DisplayName("Проверка сохранения автора")
     @Test
     public void testSavePerson() {
         Person person = new Person();
@@ -29,6 +30,7 @@ public class PersonRepositoryTest {
         assertEquals("John Doe", savedPerson.getFullName());
     }
 
+    @DisplayName("Проверка поиска автора по id")
     @Test
     public void testFindPersonById() {
         Person person = new Person();
@@ -42,6 +44,7 @@ public class PersonRepositoryTest {
         assertEquals("Jane Doe", foundPerson.get().getFullName());
     }
 
+    @DisplayName("Проверка поиска всех авторов")
     @Test
     public void testFindAllPersons() {
         Person person1 = new Person();

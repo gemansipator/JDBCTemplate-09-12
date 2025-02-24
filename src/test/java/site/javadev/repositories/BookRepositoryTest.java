@@ -17,6 +17,7 @@ public class BookRepositoryTest {
     @Autowired
     private BookRepository bookRepository;
 
+    @DisplayName("Проверка сохранения книги")
     @Test
     public void testSaveBook() {
         Book book = new Book();
@@ -30,6 +31,7 @@ public class BookRepositoryTest {
         assertEquals("Test Book", savedBook.getTitle());
     }
 
+    @DisplayName("Проверка поиска книги по id")
     @Test
     public void testFindBookById() {
         Book book = new Book();
@@ -44,6 +46,7 @@ public class BookRepositoryTest {
         assertEquals("Find Me", foundBook.get().getTitle());
     }
 
+    @DisplayName("Проверка поиска всех книг")
     @Test
     public void testFindAllBooks() {
         Book book1 = new Book();
@@ -63,6 +66,7 @@ public class BookRepositoryTest {
         assertEquals(2, books.size());
     }
 
+    @DisplayName("Проверка удаления книги по id")
     @Test
     public void testDeleteBookById() {
         Book book = new Book();

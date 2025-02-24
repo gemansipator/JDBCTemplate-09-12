@@ -17,6 +17,7 @@ public class PeopleRepositoryTest {
     @Autowired
     private PeopleRepository peopleRepository;
 
+    @DisplayName("Проверка сохранения пользователя")
     @Test
     public void testSavePersonSecurity() {
         PersonSecurity person = new PersonSecurity();
@@ -31,6 +32,7 @@ public class PeopleRepositoryTest {
         assertEquals("testuser", savedPerson.getUsername());
     }
 
+    @DisplayName("Проверка поиска пользователя по id")
     @Test
     public void testFindPersonSecurityById() {
         PersonSecurity person = new PersonSecurity();
@@ -46,6 +48,7 @@ public class PeopleRepositoryTest {
         assertEquals("findme", foundPerson.get().getUsername());
     }
 
+    @DisplayName("Проверка поиска всех пользователей")
     @Test
     public void testFindAllPersonSecurity() {
         PersonSecurity person1 = new PersonSecurity();
@@ -67,6 +70,7 @@ public class PeopleRepositoryTest {
         assertEquals(2, people.size());
     }
 
+    @DisplayName("Проверка удаления пользователя по id")
     @Test
     public void testDeletePersonSecurityById() {
         PersonSecurity person = new PersonSecurity();
@@ -82,6 +86,7 @@ public class PeopleRepositoryTest {
         assertFalse(deletedPerson.isPresent());
     }
 
+    @DisplayName("Проверка поиска пользователя по имени")
     @Test
     public void testFindByUsername() {
         PersonSecurity person = new PersonSecurity();
