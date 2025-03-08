@@ -1,6 +1,6 @@
 package site.javadev.repositories;
 
-import site.javadev.Model.PersonSecurity; // Импорт модели PersonSecurity
+import site.javadev.model.PersonSecurity; // Импорт модели PersonSecurity
 import org.springframework.data.jpa.repository.JpaRepository; // Импорт интерфейса для работы с JPA репозиториями
 import org.springframework.stereotype.Repository; // Импорт аннотации для обозначения репозитория
 

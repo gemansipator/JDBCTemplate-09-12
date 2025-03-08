@@ -1,4 +1,4 @@
-package site.javadev.Model;
+package site.javadev.model;
 
 import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
 import jakarta.validation.constraints.NotEmpty; // Импорт аннотации для проверки на пустоту

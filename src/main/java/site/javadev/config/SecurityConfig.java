@@ -1,4 +1,4 @@
-package site.javadev.Config;
+package site.javadev.config;
 
 import site.javadev.security.PersonDetailsService;
 import org.springframework.context.annotation.Bean;
