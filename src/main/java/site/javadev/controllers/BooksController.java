@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller // Указывает, что данный класс является контроллером Spring MVC
@@ -46,14 +48,25 @@ public class BooksController {
     @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
     @PostMapping
     public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book book, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) { // Проверяем, есть ли ошибки валидации
-            return "books/view-to-create-new-book"; // Если есть ошибки, возвращаемся к форме
+        if (bindingResult.hasErrors()) {
+            return "books/view-to-create-new-book";
         }
         try {
-            bookService.saveBook(book); // Сохраняем книгу через сервис
-            return "redirect:/books"; // Перенаправляем на список книг
+            // Заполнение обязательных полей, если они не заданы
+            if (book.getAnnotation() == null) {
+                book.setAnnotation("No annotation");
+            }
+            if (book.getCreatedAt() == null) {
+                book.setCreatedAt(LocalDateTime.now());
+            }
+            if (book.getCreatedPerson() == null) {
+                book.setCreatedPerson("system");
+            }
+
+            bookService.saveBook(book);
+            return "redirect:/books";
         } catch (Exception e) {
-            return "books/error-view"; // В случае ошибки возвращаем представление с сообщением об ошибке
+            return "books/error-view";
         }
     }
 
@@ -90,12 +103,24 @@ public class BooksController {
     public String editBook(@PathVariable("id") Long id,
                            @ModelAttribute("keyOfBookToBeEdited") @Valid Book bookFromForm,
                            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) { // Проверяем, есть ли ошибки валидации
-            return "books/view-to-edit-book"; // Если есть ошибки, возвращаемся к форме
+        if (bindingResult.hasErrors()) {
+            return "books/view-to-edit-book";
         }
-        bookFromForm.setId(id); // Устанавливаем ID книги
-        bookService.saveBook(bookFromForm); // Сохраняем изменения книги через сервис
-        return "redirect:/books"; // Перенаправляем на список книг
+        bookFromForm.setId(id);
+
+        // Заполнение обязательных полей, если они не заданы
+        if (bookFromForm.getAnnotation() == null) {
+            bookFromForm.setAnnotation("No annotation");
+        }
+        if (bookFromForm.getCreatedAt() == null) {
+            bookFromForm.setCreatedAt(LocalDateTime.now());
+        }
+        if (bookFromForm.getCreatedPerson() == null) {
+            bookFromForm.setCreatedPerson("system");
+        }
+
+        bookService.saveBook(bookFromForm);
+        return "redirect:/books";
     }
 
     // Удаление книги

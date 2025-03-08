@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller // Обозначает, что этот класс является контроллером Spring MVC
@@ -45,13 +46,36 @@ public class PeopleController {
     @PostMapping
     public String createPerson(@ModelAttribute("keyOfNewPerson") @Valid Person person, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "people/view-to-create-new-person"; // Вернуться к форме, если есть ошибки
+            return "people/view-to-create-new-person";
         }
         try {
-            personService.savePerson(person); // Сохраняем нового человека
-            return "redirect:/people"; // Перенаправление на список людей
+            // Заполнение обязательных полей, если они не заданы
+            if (person.getCreatedAt() == null) {
+                person.setCreatedAt(LocalDateTime.now());
+            }
+            if (person.getCreatedPerson() == null) {
+                person.setCreatedPerson("system");
+            }
+            if (person.getAge() == null) {
+                person.setAge(0);
+            }
+            if (person.getEmail() == null) {
+                person.setEmail("default@example.com");
+            }
+            if (person.getPhoneNumber() == null) {
+                person.setPhoneNumber("+1234567890");
+            }
+            if (person.getPassword() == null) {
+                person.setPassword("defaultPassword");
+            }
+            if (person.getRole() == null) {
+                person.setRole("ROLE_USER");
+            }
+
+            personService.savePerson(person);
+            return "redirect:/people";
         } catch (Exception e) {
-            return "people/error-view"; // Шаблон ошибки
+            return "people/error-view";
         }
     }
 
@@ -89,11 +113,35 @@ public class PeopleController {
                              @ModelAttribute("keyOfPersonToBeEdited") @Valid Person personFromForm,
                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "people/view-to-edit-person"; // Вернуться к форме, если есть ошибки
+            return "people/view-to-edit-person";
         }
-        personFromForm.setId(id); // Устанавливаем ID для обновления
-        personService.updatePerson(personFromForm); // Обновляем данные человека
-        return "redirect:/people"; // Перенаправление на список людей
+        personFromForm.setId(id);
+
+        // Заполнение обязательных полей, если они не заданы
+        if (personFromForm.getCreatedAt() == null) {
+            personFromForm.setCreatedAt(LocalDateTime.now());
+        }
+        if (personFromForm.getCreatedPerson() == null) {
+            personFromForm.setCreatedPerson("system");
+        }
+        if (personFromForm.getAge() == null) {
+            personFromForm.setAge(0);
+        }
+        if (personFromForm.getEmail() == null) {
+            personFromForm.setEmail("default@example.com");
+        }
+        if (personFromForm.getPhoneNumber() == null) {
+            personFromForm.setPhoneNumber("+1234567890");
+        }
+        if (personFromForm.getPassword() == null) {
+            personFromForm.setPassword("defaultPassword");
+        }
+        if (personFromForm.getRole() == null) {
+            personFromForm.setRole("ROLE_USER");
+        }
+
+        personService.updatePerson(personFromForm);
+        return "redirect:/people";
     }
 
     // Удаление человека по ID DELETE
