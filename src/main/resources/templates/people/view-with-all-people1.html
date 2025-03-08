@@ -20,24 +20,24 @@
         .people-list {
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* Выравнивание по левому краю */
+            align-items: flex-start;
             margin-top: 20px;
             padding: 0 20px;
         }
 
         .person-item {
             display: flex;
-            justify-content: flex-start; /* Выравнивание содержимого в строке слева */
-            align-items: center; /* Выравнивание по вертикали */
-            width: 100%; /* Занимает всю ширину */
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
             margin: 10px 0;
             padding: 10px;
-            border-bottom: 1px solid #ccc; /* Линия между элементами */
+            border-bottom: 1px solid #ccc;
         }
 
         .person-item span {
             font-size: 1em;
-            margin-right: 15px; /* Отступы между лейблами и значениями */
+            margin-right: 15px;
             color: #555;
         }
 
@@ -58,23 +58,23 @@
             background-color: #e0f7e0;
         }
     </style>
-
 </head>
 <body>
+<h1>Список пользователей</h1>
 
-<!-- Цикл для отображения списка людей -->
-<div th:each="eachPerson : ${keyAllPeoples}">
-    <!-- Ссылка с именем и годом рождения человека -->
-    <a th:href="@{/people/{id}(id=${eachPerson.getId()})}">
-        <span th:text="${eachPerson.getFullName()}"></span>
-        <span th:text="',' + ${eachPerson.getBirthYear()}"></span>
-    </a>
+<div class="people-list">
+    <!-- Цикл для отображения списка пользователей -->
+    <div class="person-item" th:each="eachPerson : ${keyAllPeoples}">
+        <a th:href="@{/people/{id}(id=${eachPerson.getId()})}">
+            <span th:text="${eachPerson.getFullName()}"></span>
+            <span th:text="',' + ${eachPerson.getBirthYear()}"></span>
+            <span th:text="'Email: ' + ${eachPerson.getEmail()}"></span>
+            <span th:text="'Телефон: ' + ${eachPerson.getPhoneNumber()}"></span>
+        </a>
+    </div>
 </div>
 
-<!-- Ссылка для добавления нового человека -->
-<a th:href="@{/people/create}">Добавить человека</a>
-
-
-
+<!-- Ссылка для добавления нового пользователя -->
+<a class="add-person-link" th:href="@{/people/create}">Добавить пользователя</a>
 </body>
 </html>

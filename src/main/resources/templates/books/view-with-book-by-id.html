@@ -82,6 +82,7 @@
   <p><strong>Название:</strong> <span th:text="${keyBookById.getTitle()}">Название книги</span></p>
   <p><strong>Автор:</strong> <span th:text="${keyBookById.getAuthor()}">Автор книги</span></p>
   <p><strong>Год выпуска:</strong> <span th:text="${keyBookById.getYear()}">Год выпуска</span></p>
+  <p><strong>Аннотация:</strong> <span th:text="${keyBookById.getAnnotation()}">Аннотация</span></p>
 
   <div th:if="${keyBookById.owner != null}">
     <p><strong>Книга сейчас у:</strong> <span th:text="${keyBookById.owner.getFullName()}" class="highlight">Имя владельца</span></p>

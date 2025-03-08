@@ -41,7 +41,7 @@
       margin-bottom: 5px;
       text-align: left;
     }
-    input[type="text"], input[type="number"] {
+    input[type="text"], input[type="number"], textarea {
       width: 100%;
       padding: 10px;
       margin-bottom: 15px;
@@ -76,22 +76,22 @@
   <form th:method="post"
         th:action="@{/books/edit/{id}(id=${Book.getId()})}"
         th:object="${Book}">
-    <!-- Поле для ввода названия -->
-    <label for="titleOfInput">Введите название книги</label>
-    <input type="text" id="titleOfInput" th:field="*{title}" />
+    <label for="titleOfInput">Название книги:</label>
+    <input type="text" id="titleOfInput" th:field="*{title}" required />
     <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
 
-    <!-- Поле для ввода автора -->
-    <label for="authorOfInput">Введите автора</label>
-    <input type="text" id="authorOfInput" th:field="*{author}" />
+    <label for="authorOfInput">Автор:</label>
+    <input type="text" id="authorOfInput" th:field="*{author}" required />
     <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
 
-    <!-- Поле для ввода года -->
-    <label for="yearOfInput">Введите год</label>
-    <input type="number" id="yearOfInput" th:field="*{year}" />
+    <label for="yearOfInput">Год издания:</label>
+    <input type="number" id="yearOfInput" th:field="*{year}" required />
     <div class="error" th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
 
-    <!-- Кнопка отправки -->
+    <label for="annotationOfInput">Аннотация:</label>
+    <textarea id="annotationOfInput" th:field="*{annotation}" required></textarea>
+    <div class="error" th:if="${#fields.hasErrors('annotation')}" th:errors="*{annotation}"></div>
+
     <input type="submit" value="Редактировать!" />
   </form>
 </div>
