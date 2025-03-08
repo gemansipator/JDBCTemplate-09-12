@@ -23,7 +23,7 @@ public class PersonSecurity {
 
     @NotEmpty(message = "Поле не может быть пустым") // Проверка на пустое значение
     @Size(min = 2, max = 20, message = "Поле должно быть от 2 до 20 символов") // Проверка на размер строки
-    @Column(name = "username") // Название столбца в базе данных
+    @Column(name = "username") // Название столбца в zбазе данных
     private String username; // Имя пользователя
 
     // @NotEmpty(message = "Поле не может быть пустым") // Проверка на пустое значение

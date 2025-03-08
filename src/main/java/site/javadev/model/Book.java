@@ -1,51 +1,29 @@
 package site.javadev.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
+import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
+import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
 
-@Getter
-@Setter
-@Entity
-@Table(name = "book")
+@Getter // Генерация геттеров для всех полей
+@Setter // Генерация сеттеров для всех полей
+@Entity // Обозначает, что это сущность для JPA
+@Table(name = "book") // Указывает название таблицы в базе данных
 public class Book {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Id // Указывает, что это первичный ключ
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоматическая генерация значения ключа
+    @Column(name = "id") // Название столбца в базе данных
+    private long id;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    @Column(nullable = false) // Указывает, что поле не может быть пустым
+    private String title; // Название книги
 
-    @Column(name = "year_of_production", nullable = false)
-    private Integer yearOfProduction;
+    @Column(nullable = false) // Указывает, что поле не может быть пустым
+    private String author; // Автор книги
 
-    @Column(name = "author", nullable = false, length = 100)
-    private String author;
+    @Column(name = "year", nullable = false) // Переименовал year -> publication_year
+    private int year;
 
-    @Column(name = "annotation", columnDefinition = "TEXT")
-    private String annotation;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "removed_at")
-    private LocalDateTime removedAt;
-
-    @Column(name = "created_person", nullable = false, length = 100)
-    private String createdPerson;
-
-    @Column(name = "updated_person", length = 100)
-    private String updatedPerson;
-
-    @Column(name = "removed_person", length = 100)
-    private String removedPerson;
-
-    @ManyToOne
-    @JoinColumn(name = "person_id")
-    private Person person; // Связь с пользователем, который взял книгу
+    @ManyToOne // Указывает связь "многие к одному" с сущностью Person
+    @JoinColumn(name = "owner_id") // Указывает, какой столбец в таблице связан с владельцем книги
+    private Person owner; // Владелец книги, связь с сущностью Person
 }

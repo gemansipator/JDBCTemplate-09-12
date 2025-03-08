@@ -1,47 +1,27 @@
 package site.javadev.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
+import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
+import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
 
-@Getter
-@Setter
-@Entity
-@Table(name = "person")
+import java.util.List; // Импорт коллекции для списка книг
+
+@Getter // Генерация геттеров для всех полей
+@Setter // Генерация сеттеров для всех полей
+@Entity // Обозначает, что это сущность для JPA
+@Table(name = "person") // Указывает название таблицы в базе данных
 public class Person {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Id // Указывает, что это первичный ключ
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоматическая генерация значения ключа
+    @Column(name = "id") // Название столбца в базе данных
+    private long id;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    @Column(name = "full_name", nullable = false, unique = true, length = 100) // Указывает столбец с ограничениями
+    private String fullName; // Полное имя человека
 
-    @Column(name = "age", nullable = false)
-    private Integer age;
+    @Column(name = "birth_year", nullable = false) // Указывает столбец с ограничением на не-null значение
+    private int birthYear; // Год рождения человека
 
-    @Column(name = "email", unique = true, nullable = false, length = 100)
-    private String email;
-
-    @Column(name = "phone_number", unique = true, nullable = false, length = 20)
-    private String phoneNumber;
-
-    @Column(name = "password", nullable = false)
-    private String password;
-
-    @Column(name = "role", nullable = false)
-    private String role;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "removed_at")
-    private LocalDateTime removedAt;
-
-    @Column(name = "created_person", nullable = false, length = 100)
-    private String createdPerson;
-
-    @Column(name = "removed_person", length = 100)
-    private String removedPerson;
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = false) // Связь "один ко многим" с сущностью Book
+    private List<Book> books; // Список книг, принадлежащих человеку, связь с сущностью Book
 }
