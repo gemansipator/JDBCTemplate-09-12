@@ -29,7 +29,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, PersonDetailsService personDetailsService) throws Exception {
         http
                 .csrf().disable() // Отключаем CSRF, так как используем JWT
                 .authorizeHttpRequests((authz) -> authz
@@ -47,12 +47,25 @@ public class SecurityConfig {
                         // Доступ к /auth/admin/** только для роли ADMIN
                         .anyRequest().authenticated())
                 // Остальные запросы требуют аутентификации
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // Отключаем сессии
-
-        // Добавляем JWT-фильтр перед UsernamePasswordAuthenticationFilter
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .userDetailsService(personDetailsService)
+                // Указание кастомного UserDetailsService
+                .formLogin().loginPage("/auth/login")
+                // Указание страницы для формы входа
+                .loginProcessingUrl("/process_login")
+                // URL для обработки формы входа
+                .defaultSuccessUrl("/", true)
+                // Перенаправление после успешного входа
+                .failureUrl("/auth/login?error")
+                // Перенаправление при ошибке входа
+                .and()
+                .logout()
+                .logoutUrl("/logout")
+                // URL для выхода
+                .logoutSuccessUrl("/auth/login");
+        // Перенаправление после выхода
 
         return http.build();
+        // Возвращаем настроенную цепочку фильтров безопасности
     }
 
     @Bean
