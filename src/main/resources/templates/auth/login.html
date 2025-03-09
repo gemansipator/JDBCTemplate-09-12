@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <style>
+        /* Стили остаются без изменений */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -79,17 +80,21 @@
 <body>
 <div class="container">
     <h1>Авторизация</h1>
-    <form name="f" method="post" action="/process_login">
-        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+    <form method="post" action="/process_login">
+        <!-- Убран CSRF-токен -->
         <label for="username">Имя пользователя</label>
         <input type="text" name="username" id="username" required />
+
         <label for="password">Пароль</label>
         <input type="password" name="password" id="password" required />
+
         <div th:if="${param.error}" class="error-message">
             Неправильные имя или пароль
         </div>
+
         <input type="submit" value="Войти" />
     </form>
+
     <div class="registration-link">
         <a href="/auth/registration">Зарегистрироваться</a>
     </div>

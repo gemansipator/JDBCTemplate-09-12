@@ -1,83 +1,82 @@
 package site.javadev.repositories;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import site.javadev.model.Book;
 
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
-@DisplayName("Book Repository Test")
+
 @DataJpaTest
 public class BookRepositoryTest {
 
     @Autowired
     private BookRepository bookRepository;
 
-    @DisplayName("Проверка сохранения книги")
     @Test
     public void testSaveBook() {
         Book book = new Book();
         book.setTitle("Test Book");
         book.setAuthor("Test Author");
-        book.setPublicationYear(2023);
+        book.setYear(2023); // Используйте setYear вместо setPublicationYear
+        book.setAnnotation("Test Annotation");
 
         Book savedBook = bookRepository.save(book);
 
         assertNotNull(savedBook.getId());
         assertEquals("Test Book", savedBook.getTitle());
+        assertEquals("Test Author", savedBook.getAuthor());
+        assertEquals(2023, savedBook.getYear());
+        assertEquals("Test Annotation", savedBook.getAnnotation());
     }
 
-    @DisplayName("Проверка поиска книги по id")
     @Test
     public void testFindBookById() {
         Book book = new Book();
-        book.setTitle("Find Me");
-        book.setAuthor("Author");
-        book.setPublicationYear(2020);
-        bookRepository.save(book);
+        book.setTitle("Test Book");
+        book.setAuthor("Test Author");
+        book.setYear(2023); // Используйте setYear вместо setPublicationYear
+        book.setAnnotation("Test Annotation");
 
-        Optional<Book> foundBook = bookRepository.findById(book.getId());
+        Book savedBook = bookRepository.save(book);
+        Book foundBook = bookRepository.findById(savedBook.getId()).orElse(null);
 
-        assertTrue(foundBook.isPresent());
-        assertEquals("Find Me", foundBook.get().getTitle());
+        assertNotNull(foundBook);
+        assertEquals("Test Book", foundBook.getTitle());
+        assertEquals("Test Author", foundBook.getAuthor());
+        assertEquals(2023, foundBook.getYear());
+        assertEquals("Test Annotation", foundBook.getAnnotation());
     }
 
-    @DisplayName("Проверка поиска всех книг")
     @Test
-    public void testFindAllBooks() {
-        Book book1 = new Book();
-        book1.setTitle("Book 1");
-        book1.setAuthor("Author 1");
-        book1.setPublicationYear(2021);
-        bookRepository.save(book1);
-
-        Book book2 = new Book();
-        book2.setTitle("Book 2");
-        book2.setAuthor("Author 2");
-        book2.setPublicationYear(2022);
-        bookRepository.save(book2);
-
-        List<Book> books = bookRepository.findAll();
-
-        assertEquals(2, books.size());
-    }
-
-    @DisplayName("Проверка удаления книги по id")
-    @Test
-    public void testDeleteBookById() {
+    public void testUpdateBook() {
         Book book = new Book();
-        book.setTitle("Delete Me");
-        book.setAuthor("Author");
-        book.setPublicationYear(2019);
-        bookRepository.save(book);
+        book.setTitle("Test Book");
+        book.setAuthor("Test Author");
+        book.setYear(2023); // Используйте setYear вместо setPublicationYear
+        book.setAnnotation("Test Annotation");
 
-        bookRepository.deleteById(book.getId());
+        Book savedBook = bookRepository.save(book);
+        savedBook.setTitle("Updated Title");
+        savedBook.setYear(2024); // Используйте setYear вместо setPublicationYear
 
-        Optional<Book> deletedBook = bookRepository.findById(book.getId());
-        assertFalse(deletedBook.isPresent());
+        Book updatedBook = bookRepository.save(savedBook);
+
+        assertEquals("Updated Title", updatedBook.getTitle());
+        assertEquals(2024, updatedBook.getYear());
+    }
+
+    @Test
+    public void testDeleteBook() {
+        Book book = new Book();
+        book.setTitle("Test Book");
+        book.setAuthor("Test Author");
+        book.setYear(2023); // Используйте setYear вместо setPublicationYear
+        book.setAnnotation("Test Annotation");
+
+        Book savedBook = bookRepository.save(book);
+        bookRepository.delete(savedBook);
+
+        assertFalse(bookRepository.findById(savedBook.getId()).isPresent());
     }
 }

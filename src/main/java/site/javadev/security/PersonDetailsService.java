@@ -1,29 +1,31 @@
 package site.javadev.security;
 
-import site.javadev.model.PersonSecurity; // Импорт модели PersonSecurity для работы с данными пользователя
-import site.javadev.repositories.PeopleRepository; // Импорт репозитория для работы с базой данных пользователей
-import lombok.RequiredArgsConstructor; // Импорт аннотации для автоматической генерации конструктора
-import org.springframework.security.core.userdetails.UserDetails; // Импорт интерфейса для работы с деталями пользователя
-import org.springframework.security.core.userdetails.UserDetailsService; // Импорт интерфейса для предоставления пользовательских данных
-import org.springframework.security.core.userdetails.UsernameNotFoundException; // Импорт исключения для обработки ошибки, когда пользователь не найден
-import org.springframework.stereotype.Service; // Импорт аннотации для определения сервиса
+import site.javadev.model.PersonSecurity;
+import site.javadev.repositories.PeopleRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import java.util.Optional; // Импорт Optional для безопасной работы с возможными null-значениями
+import java.util.Optional;
 
-@Service // Обозначение класса как сервис для внедрения зависимостей
-@RequiredArgsConstructor // Генерация конструктора с обязательными параметрами (репозиторий)
-public class PersonDetailsService implements UserDetailsService { // Реализация интерфейса UserDetailsService для загрузки данных пользователя
+@Service
+public class PersonDetailsService implements UserDetailsService {
 
-    private final PeopleRepository peopleRepository; // Репозиторий для работы с пользователями в базе данных
+    private final PeopleRepository peopleRepository;
+
+    public PersonDetailsService(PeopleRepository peopleRepository) {
+        this.peopleRepository = peopleRepository;
+    }
 
     @Override
-    public UserDetails loadUserByUsername(String username) { // Метод для загрузки пользователя по имени
-        Optional<PersonSecurity> person = peopleRepository.findByUsername(username); // Поиск пользователя в базе данных
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<PersonSecurity> person = peopleRepository.findByUsername(username);
 
-        if (person.isEmpty()) { // Если пользователь не найден, выбрасываем исключение
-            throw new UsernameNotFoundException("Repository has not found user with username: " + username);
+        if (person.isEmpty()) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
         }
 
-        return new PersonDetails(person.get()); // Если пользователь найден, возвращаем объект PersonDetails
+        return new PersonDetails(person.get());
     }
 }
