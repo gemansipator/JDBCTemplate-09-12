@@ -41,6 +41,13 @@ public class PeopleController {
         return "people/view-to-create-new-person"; // Шаблон для добавления нового человека
     }
 
+    @GetMapping("/{id}/books") //на руках у текущего пользователя
+    public String getBooksOnHand(@PathVariable("id") Long id, Model model) {
+        Person person = personService.getPersonById(id);
+        model.addAttribute("booksOnHand", person.getBooks());
+        return "people/view-books-on-hand";
+    }
+
     // Добавление нового человека POST
     @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
     @PostMapping

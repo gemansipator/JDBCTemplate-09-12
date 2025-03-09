@@ -44,6 +44,13 @@ public class BooksController {
         return "books/view-to-create-new-book"; // Возвращаем имя представления для формы создания книги
     }
 
+    @GetMapping("/manage")     //на руках у пользователей
+    public String manageBooksOnHand(Model model) {
+        model.addAttribute("allBooks", bookService.getAllBooks());
+        model.addAttribute("allPeople", personService.getAllPersons());
+        return "books/manage-books-on-hand";
+    }
+
     // Создание книги (обработка формы)
     @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
     @PostMapping

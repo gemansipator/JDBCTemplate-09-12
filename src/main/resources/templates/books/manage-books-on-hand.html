@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление книгами на руках</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .books-list {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-item a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .book-item a:hover {
+            color: #0056b3;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .actions button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<h1>Управление книгами на руках</h1>
+
+<div class="books-list">
+    <!-- Цикл для отображения книг -->
+    <div class="book-item" th:each="book : ${allBooks}">
+        <a th:href="@{/books/{id}(id=${book.id})}">
+            <span th:text="${book.title}"></span>
+        </a>
+        <span th:text="'Автор: ' + ${book.author}"></span>
+        <span th:text="'Год: ' + ${book.year}"></span>
+        <div class="actions">
+            <form th:action="@{/books/assign/{id}(id=${book.id})}" method="post">
+                <select name="personId">
+                    <option th:each="person : ${allPeople}"
+                            th:value="${person.id}"
+                            th:text="${person.fullName}">
+                    </option>
+                </select>
+                <button type="submit">Назначить</button>
+            </form>
+            <form th:action="@{/books/loose/{id}(id=${book.id})}" method="post">
+                <button type="submit">Освободить</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Ссылка на главную страницу -->
+<a href="/">На главную</a>
+</body>
+</html>
