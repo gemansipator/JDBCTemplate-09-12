@@ -27,6 +27,26 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final PersonDetailsService personDetailsService;
 
+    @GetMapping("/registration")
+    public String registration(Model model) {
+        model.addAttribute("person", new Person());
+        return "auth/registration";
+    }
+
+    @PostMapping("/registration")
+    public String register(@ModelAttribute("person") Person person,
+                           BindingResult bindingResult) {
+        System.out.println("Registering person: " + person);
+        personValidator.validate(person, bindingResult);
+        if (bindingResult.hasErrors()) {
+            System.out.println("Validation errors: " + bindingResult.getAllErrors());
+            return "auth/registration";
+        }
+        peopleService.savePerson(person);
+        System.out.println("Redirecting to /auth/login");
+        return "redirect:/auth/login";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "auth/login";
@@ -37,76 +57,23 @@ public class AuthController {
                         @RequestParam String password,
                         HttpServletResponse response,
                         Model model) {
+        System.out.println("Attempting login for: " + username);
         try {
-            // Аутентификация пользователя
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-
-            // Загрузка данных пользователя
             UserDetails userDetails = personDetailsService.loadUserByUsername(username);
-
-            // Генерация JWT-токена
+            System.out.println("User found: " + userDetails.getUsername() + ", authorities: " + userDetails.getAuthorities());
             String token = jwtTokenProvider.generateToken(userDetails.getUsername());
-
-            // Сохранение токена в cookie
             Cookie jwtCookie = new Cookie("jwtToken", token);
             jwtCookie.setHttpOnly(true);
             jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(3600); // 1 час
+            jwtCookie.setMaxAge(3600);
             response.addCookie(jwtCookie);
-
-            return "redirect:/"; // Перенаправление на главную страницу
+            System.out.println("Login successful, token: " + token);
+            return "redirect:/";
         } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
             model.addAttribute("error", "Неправильные имя или пароль");
-            return "auth/login"; // Возврат на страницу логина с ошибкой
+            return "auth/login";
         }
-    }
-
-    @GetMapping("/registration")
-    public String registration(Model model) {
-        model.addAttribute("person", new Person());
-        return "auth/registration";
-    }
-
-    @PostMapping("/registration")
-    public String register(@ModelAttribute("person") Person person,
-                           BindingResult bindingResult) {
-        personValidator.validate(person, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            return "auth/registration";
-        }
-
-        peopleService.savePerson(person);
-        return "redirect:/auth/login";
-    }
-
-    @GetMapping("/admin")
-    public String getAdminPage(Model model) {
-        model.addAttribute("users", peopleService.getAllUsers());
-        return "auth/admin";
-    }
-
-    @PostMapping("/admin/assign-role")
-    public String assignRole(@RequestParam("username") String username,
-                             @RequestParam("role") String role,
-                             Model model) {
-        try {
-            peopleService.changeUserRole(username, role);
-            model.addAttribute("successMessage", "Роль успешно изменена!");
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Ошибка: " + e.getMessage());
-        }
-        model.addAttribute("users", peopleService.getAllUsers());
-        return "auth/admin";
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie("jwtToken", null);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(0);
-        response.addCookie(jwtCookie);
-        return "redirect:/auth/login";
     }
 }

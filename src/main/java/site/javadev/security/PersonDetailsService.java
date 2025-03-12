@@ -2,28 +2,27 @@ package site.javadev.security;
 
 import site.javadev.model.Person;
 import site.javadev.repositories.PersonRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
+@RequiredArgsConstructor
 public class PersonDetailsService implements UserDetailsService {
 
     private final PersonRepository personRepository;
 
-    public PersonDetailsService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
-
     @Override
-    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
-        Optional<Person> person = personRepository.findByName(name);
-        if (person.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with name: " + name);
-        }
-        return new PersonDetails(person.get());
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Person person = personRepository.findByName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
+        return User
+                .withUsername(person.getName())
+                .password(person.getPassword())
+                .roles(person.getRole().replace("ROLE_", ""))
+                .build();
     }
 }
