@@ -3,101 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
+    <title>Регистрация</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-        .container h1 {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        label {
-            font-size: 0.9rem;
-            color: #555;
-            margin-bottom: 5px;
-            display: block;
-        }
-        input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-        .error-message {
-            color: red;
-            font-size: 0.85rem;
-            margin-bottom: 10px;
-        }
-        input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        .redirect {
-            margin-top: 15px;
-            text-align: center;
-        }
-        .redirect a {
-            font-size: 0.9rem;
-            color: #007BFF;
-            text-decoration: none;
-        }
-        .redirect a:hover {
-            text-decoration: underline;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; color: #333; }
+        label { display: block; margin: 10px 0 5px; color: #555; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .error { color: red; font-size: 0.8em; margin-bottom: 10px; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Регистрация</h1>
-    <form th:method="POST" th:action="@{/auth/registration}" th:object="${person}">
-        <label for="username">Имя пользователя</label>
-        <input type="text" th:field="*{username}" id="username" required />
-        <div th:if="${#fields.hasErrors('username')}" class="error-message" th:errors="*{username}">
-            Ошибка в имени пользователя
-        </div>
+    <h2>Регистрация</h2>
+    <form th:action="@{/auth/registration}" th:object="${person}" method="post">
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" th:field="*{username}" required />
+        <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
 
-        <label for="yearOfBirth">Год рождения (опционально)</label>
-        <input type="number" th:field="*{yearOfBirth}" id="yearOfBirth" />
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" th:field="*{password}" required />
+        <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
 
-        <label for="password">Пароль</label>
-        <input type="password" th:field="*{password}" id="password" required />
-        <div th:if="${#fields.hasErrors('password')}" class="error-message" th:errors="*{password}">
-            Ошибка в пароле
-        </div>
+        <label for="name">ФИО:</label>
+        <input type="text" id="name" th:field="*{name}" required />
+        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
-        <input type="submit" value="Зарегистрироваться" />
+        <label for="age">Возраст:</label>
+        <input type="number" id="age" th:field="*{age}" required />
+        <div class="error" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
+
+        <label for="email">Email:</label>
+        <input type="text" id="email" th:field="*{email}" required />
+        <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+
+        <label for="phoneNumber">Телефон:</label>
+        <input type="text" id="phoneNumber" th:field="*{phoneNumber}" required />
+        <div class="error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+
+        <button type="submit">Зарегистрироваться</button>
     </form>
-    <div class="redirect">
-        <a href="/auth/login">Авторизация</a>
-    </div>
 </div>
 </body>
+</html>

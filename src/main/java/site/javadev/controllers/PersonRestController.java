@@ -1,7 +1,6 @@
 package site.javadev.controllers;
 
 import site.javadev.model.Person;
-import site.javadev.service.PeopleService;
 import site.javadev.service.PersonService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,13 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/people")
 public class PersonRestController {
-
     private final PersonService personService;
-    private final PeopleService peopleService;
 
-    public PersonRestController(PersonService personService, PeopleService peopleService) {
+    public PersonRestController(PersonService personService) {
         this.personService = personService;
-        this.peopleService = peopleService;
     }
 
     @GetMapping
@@ -37,7 +33,7 @@ public class PersonRestController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        peopleService.savePerson(person);
+        personService.savePerson(person); // Проверяем, что метод существует и возвращает void
         return ResponseEntity.ok(person);
     }
 
@@ -45,7 +41,8 @@ public class PersonRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person person) {
         person.setId(id);
-        return ResponseEntity.ok(personService.savePerson(person));
+        personService.savePerson(person); // Аналогично
+        return ResponseEntity.ok(person);
     }
 
     @DeleteMapping("/{id}")

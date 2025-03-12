@@ -1,43 +1,71 @@
 package site.javadev.service;
 
-import site.javadev.model.Person; // Импорт модели Person для работы с сущностью пользователя
-import site.javadev.repositories.PersonRepository; // Импорт репозитория для работы с пользователями в базе данных
-import org.springframework.stereotype.Service; // Аннотация для пометки класса как сервиса в контексте Spring
+import site.javadev.model.Person;
+import site.javadev.repositories.PersonRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List; // Импорт коллекции List для работы с множественными объектами
+import java.time.LocalDateTime;
+import java.util.List;
 
-@Service // Аннотация для того, чтобы Spring управлял этим классом как сервисом
+@Service
+@RequiredArgsConstructor
 public class PersonService {
+    private final PersonRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    private final PersonRepository personRepository; // Репозиторий для работы с пользователями
-
-    // Конструктор, для инъекции зависимостей PersonRepository
-    public PersonService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
+    @Transactional
+    public void savePerson(Person person) {
+        try {
+            System.out.println("Saving person: " + person.getUsername());
+            if (person.getPassword() != null) {
+                person.setPassword(passwordEncoder.encode(person.getPassword()));
+            }
+            if (person.getRole() == null) {
+                person.setRole("ROLE_USER");
+            }
+            if (person.getCreatedAt() == null) {
+                person.setCreatedAt(LocalDateTime.now());
+            }
+            if (person.getCreatedPerson() == null) {
+                person.setCreatedPerson("system");
+            }
+            personRepository.save(person);
+            System.out.println("Person saved: " + person.getUsername());
+        } catch (Exception e) {
+            System.out.println("Error saving person: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
-    // Получение всех пользователей
+    @PreAuthorize("hasRole('ADMIN')")
+    public void changeUserRole(String username, String role) {
+        Person person = personRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
+        person.setRole(role);
+        personRepository.save(person);
+    }
+
     public List<Person> getAllPersons() {
-        return personRepository.findAll(); // Возвращает все сущности Person из базы данных
+        return personRepository.findAll();
     }
 
-    // Получение пользователя по идентификатору
     public Person getPersonById(Long id) {
-        return personRepository.findById(id).orElse(null); // Ищет пользователя по id и возвращает его, если найден, иначе null
+        return personRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Person not found with id: " + id));
     }
 
-    // Сохранение нового пользователя
-    public Person savePerson(Person person) {
-        return personRepository.save(person); // Сохраняет или обновляет пользователя в базе данных
-    }
-
-    // Обновление данных пользователя
-    public void updatePerson(Person person) {
-        personRepository.save(person); // Сохраняет изменения пользователя в базе данных
-    }
-
-    // Удаление пользователя по идентификатору
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void deletePerson(Long id) {
-        personRepository.deleteById(id); // Удаляет пользователя по id из базы данных
+        Person person = getPersonById(id);
+        person.setRemovedAt(LocalDateTime.now());
+        person.setRemovedPerson("system");
+        personRepository.save(person);
     }
 }

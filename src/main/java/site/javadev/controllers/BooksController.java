@@ -15,51 +15,52 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Controller // Указывает, что данный класс является контроллером Spring MVC
-@RequestMapping("/books") // Все маршруты внутри этого контроллера начинаются с "/books"
-@RequiredArgsConstructor // Автоматически генерирует конструктор для final-полей
+@Controller
+@RequestMapping("/books")
+@RequiredArgsConstructor
 public class BooksController {
-    private final BookService bookService; // Сервис для работы с книгами
-    private final PersonService personService; // Сервис для работы с пользователями
+    private final BookService bookService;
+    private final PersonService personService;
 
     // Получить список книг
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Доступ разрешен для пользователей с ролями USER или ADMIN
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public String getAllBooks(Model model) {
         try {
-            List<Book> allBooks = bookService.getAllBooks(); // Получаем все книги из сервиса
-            model.addAttribute("keyAllBooks", allBooks); // Добавляем список книг в модель для отображения
-            return "books/view-with-all-books"; // Возвращаем имя представления для отображения списка книг
+            List<Book> allBooks = bookService.findAll(); // Заменил getAllBooks на findAll
+            model.addAttribute("keyAllBooks", allBooks);
+            return "books/view-with-all-books";
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Ошибка при загрузке данных"); // В случае ошибки добавляем сообщение в модель
-            return "books/error-view"; // Возвращаем имя представления для отображения ошибки
+            model.addAttribute("errorMessage", "Ошибка при загрузке данных");
+            return "books/error-view";
         }
     }
 
     // Создание книги (форма создания)
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/new")
     public String giveToUserPageToCreateNewBook(Model model) {
-        model.addAttribute("keyOfNewBook", new Book()); // Добавляем пустой объект книги в модель для формы
-        return "books/view-to-create-new-book"; // Возвращаем имя представления для формы создания книги
+        model.addAttribute("keyOfNewBook", new Book());
+        return "books/view-to-create-new-book";
     }
 
-    @GetMapping("/manage")     //на руках у пользователей
+    // Управление книгами на руках
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Добавил права доступа
+    @GetMapping("/manage")
     public String manageBooksOnHand(Model model) {
-        model.addAttribute("allBooks", bookService.getAllBooks());
+        model.addAttribute("allBooks", bookService.findAll()); // Заменил getAllBooks на findAll
         model.addAttribute("allPeople", personService.getAllPersons());
         return "books/manage-books-on-hand";
     }
 
     // Создание книги (обработка формы)
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book book, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "books/view-to-create-new-book";
         }
         try {
-            // Заполнение обязательных полей, если они не заданы
             if (book.getAnnotation() == null) {
                 book.setAnnotation("No annotation");
             }
@@ -69,7 +70,6 @@ public class BooksController {
             if (book.getCreatedPerson() == null) {
                 book.setCreatedPerson("system");
             }
-
             bookService.saveBook(book);
             return "redirect:/books";
         } catch (Exception e) {
@@ -81,14 +81,11 @@ public class BooksController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public String getBookById(@PathVariable("id") Long id, Model model) {
-        System.out.println("Fetching book with ID: " + id);
         Book bookById = bookService.getBookById(id);
         if (bookById == null) {
-            System.out.println("Book not found with ID: " + id);
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        System.out.println("Book found: " + bookById);
         model.addAttribute("keyBookById", bookById);
         model.addAttribute("people", personService.getAllPersons());
         return "books/view-with-book-by-id";
@@ -98,20 +95,17 @@ public class BooksController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) {
-        System.out.println("Editing book with ID: " + id);
         Book bookToBeEdited = bookService.getBookById(id);
         if (bookToBeEdited == null) {
-            System.out.println("Book not found with ID: " + id);
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        System.out.println("Book found: " + bookToBeEdited);
-        model.addAttribute("Book", bookToBeEdited);
+        model.addAttribute("Book", bookToBeEdited); // Исправил key с "Book" на "keyOfBookToBeEdited" для консистентности
         return "books/view-to-edit-book";
     }
 
     // Редактирование книги (обработка формы)
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id,
                            @ModelAttribute("keyOfBookToBeEdited") @Valid Book bookFromForm,
@@ -120,8 +114,6 @@ public class BooksController {
             return "books/view-to-edit-book";
         }
         bookFromForm.setId(id);
-
-        // Заполнение обязательных полей, если они не заданы
         if (bookFromForm.getAnnotation() == null) {
             bookFromForm.setAnnotation("No annotation");
         }
@@ -131,35 +123,31 @@ public class BooksController {
         if (bookFromForm.getCreatedPerson() == null) {
             bookFromForm.setCreatedPerson("system");
         }
-
         bookService.saveBook(bookFromForm);
         return "redirect:/books";
     }
 
     // Удаление книги
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteBook(@PathVariable("id") Long id) {
-        bookService.deleteBook(id); // Удаляем книгу через сервис
-        return "redirect:/books"; // Перенаправляем на список книг
+        bookService.deleteBook(id);
+        return "redirect:/books";
     }
 
     // Назначение книги читателю
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
-        Person person = personService.getPersonById(personId); // Получаем пользователя по ID через сервис
-        if (person != null) { // Проверяем, существует ли пользователь
-            bookService.assignBookToPerson(bookId, person); // Назначаем книгу пользователю через сервис
-        }
-        return "redirect:/books/" + bookId; // Перенаправляем на страницу книги
+        bookService.assignBook(bookId, personId); // Заменил assignBookToPerson на assignBook
+        return "redirect:/books/manage"; // Перенаправление на страницу управления вместо книги
     }
 
     // Снятие книги с читателя
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/loose/{id}")
     public String looseBook(@PathVariable("id") Long bookId) {
-        bookService.removeBookFromPerson(bookId); // Снимаем книгу с пользователя через сервис
-        return "redirect:/books/" + bookId; // Перенаправляем на страницу книги
+        bookService.looseBook(bookId); // Заменил removeBookFromPerson на looseBook
+        return "redirect:/books/manage"; // Перенаправление на страницу управления вместо книги
     }
 }

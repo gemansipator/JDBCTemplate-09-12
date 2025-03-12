@@ -1,6 +1,6 @@
 package site.javadev.validation;
 
-import site.javadev.model.PersonSecurity;
+import site.javadev.model.Person;
 import site.javadev.security.PersonDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,7 +10,6 @@ import org.springframework.validation.Validator;
 
 @Component
 public class PersonValidator implements Validator {
-
     private final PersonDetailsService personDetailsService;
 
     @Autowired
@@ -20,21 +19,17 @@ public class PersonValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return PersonSecurity.class.equals(clazz); // Поддерживаем только PersonSecurity
+        return Person.class.equals(clazz);
     }
-
 
     @Override
     public void validate(Object target, Errors errors) {
-        PersonSecurity personSecurity = (PersonSecurity) target; // Приводим к PersonSecurity
-
+        Person person = (Person) target;
         try {
-            personDetailsService.loadUserByUsername(personSecurity.getUsername());
-            // Если пользователь найден, значит имя уже занято
+            personDetailsService.loadUserByUsername(person.getUsername());
             errors.rejectValue("username", "user.exists", "Пользователь с таким именем уже существует");
-        } catch (UsernameNotFoundException e) {
+        } catch (UsernameNotFoundException ignored) {
             // Пользователь не найден — это нормально при регистрации
-            return;
         }
     }
 }

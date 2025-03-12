@@ -23,7 +23,7 @@ public class BookRestController {
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<Book>> getAllBooks() {
-        return ResponseEntity.ok(bookService.getAllBooks());
+        return ResponseEntity.ok(bookService.findAll()); // Заменил getAllBooks на findAll
     }
 
     @GetMapping("/{id}")

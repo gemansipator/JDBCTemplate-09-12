@@ -2,31 +2,32 @@ package site.javadev.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
 
-    // Используем Keys для генерации безопасного ключа для HS512
-    private final byte[] SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512).getEncoded();
-    private final long VALIDITY_IN_MS = 3600000; // 1 час
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private long validityInMs;
 
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + VALIDITY_IN_MS))
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY) // Используем байтовый массив напрямую
+                .setExpiration(new Date(System.currentTimeMillis() + validityInMs))
+                .signWith(SignatureAlgorithm.HS512, secret.getBytes())
                 .compact();
     }
 
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(SECRET_KEY) // Используем тот же ключ
+                .setSigningKey(secret.getBytes())
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
@@ -34,7 +35,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(secret.getBytes()).parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             System.out.println("Invalid JWT token: " + e.getMessage());

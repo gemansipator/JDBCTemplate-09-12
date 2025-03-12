@@ -1,28 +1,30 @@
 package site.javadev.security;
 
-import site.javadev.model.PersonSecurity;
-import site.javadev.repositories.PersonSecurityRepository;
-import lombok.RequiredArgsConstructor;
+import site.javadev.model.Person;
+import site.javadev.repositories.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
-public class PersonDetailsService implements UserDetailsService {
+import java.util.Collections;
 
-    private final PersonSecurityRepository personSecurityRepository;
+@Service
+public class PersonDetailsService implements UserDetailsService {
+    private final PersonRepository personRepository;
+
+    @Autowired
+    public PersonDetailsService(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        PersonSecurity personSecurity = personSecurityRepository.findByUsername(username)
+        Person person = personRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-        return User.builder()
-                .username(personSecurity.getUsername())
-                .password(personSecurity.getPassword())
-                .roles(personSecurity.getRole().replace("ROLE_", ""))
-                .build();
+        return new User(person.getUsername(), person.getPassword(),
+                Collections.singleton(new org.springframework.security.core.authority.SimpleGrantedAuthority(person.getRole())));
     }
 }
