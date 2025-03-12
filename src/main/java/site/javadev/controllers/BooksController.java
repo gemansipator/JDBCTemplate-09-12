@@ -78,30 +78,36 @@ public class BooksController {
     }
 
     // Получение книги по ID
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public String getBookById(@PathVariable("id") Long id, Model model) {
-        Book bookById = bookService.getBookById(id); // Получаем книгу по ID через сервис
-        if (bookById == null) { // Проверяем, существует ли книга
-            model.addAttribute("errorMessage", "Книга не найдена"); // Если книга не найдена, добавляем сообщение об ошибке
-            return "books/error-view"; // Возвращаем представление с сообщением об ошибке
+        System.out.println("Fetching book with ID: " + id);
+        Book bookById = bookService.getBookById(id);
+        if (bookById == null) {
+            System.out.println("Book not found with ID: " + id);
+            model.addAttribute("errorMessage", "Книга не найдена");
+            return "books/error-view";
         }
-        model.addAttribute("keyBookById", bookById); // Добавляем книгу в модель для отображения
-        model.addAttribute("people", personService.getAllPersons()); // Добавляем список людей для назначения книги
-        return "books/view-with-book-by-id"; // Возвращаем имя представления для отображения информации о книге
+        System.out.println("Book found: " + bookById);
+        model.addAttribute("keyBookById", bookById);
+        model.addAttribute("people", personService.getAllPersons());
+        return "books/view-with-book-by-id";
     }
 
     // Редактирование книги (форма редактирования)
-    @PreAuthorize("hasRole('ADMIN')") // Доступ разрешен только для пользователей с ролью ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) {
-        Book bookToBeEdited = bookService.getBookById(id); // Получаем книгу по ID через сервис
-        if (bookToBeEdited == null) { // Проверяем, существует ли книга
-            model.addAttribute("errorMessage", "Книга не найдена"); // Если книга не найдена, добавляем сообщение об ошибке
-            return "books/error-view"; // Возвращаем представление с сообщением об ошибке
+        System.out.println("Editing book with ID: " + id);
+        Book bookToBeEdited = bookService.getBookById(id);
+        if (bookToBeEdited == null) {
+            System.out.println("Book not found with ID: " + id);
+            model.addAttribute("errorMessage", "Книга не найдена");
+            return "books/error-view";
         }
-        model.addAttribute("Book", bookToBeEdited); // Добавляем книгу в модель для редактирования
-        return "books/view-to-edit-book"; // Возвращаем имя представления для формы редактирования книги
+        System.out.println("Book found: " + bookToBeEdited);
+        model.addAttribute("Book", bookToBeEdited);
+        return "books/view-to-edit-book";
     }
 
     // Редактирование книги (обработка формы)

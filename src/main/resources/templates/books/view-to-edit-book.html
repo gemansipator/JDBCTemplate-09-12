@@ -19,24 +19,17 @@
 <body>
 <div class="container">
   <h1>Редактирование книги</h1>
-  <form th:method="post" th:action="@{/books/edit/{id}(id=${book.id})}" th:object="${book}">
-    <label for="nameOfInput">Название книги:</label>
-    <input type="text" id="nameOfInput" th:field="*{name}" required />
-    <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-
-    <label for="authorOfInput">Автор:</label>
-    <input type="text" id="authorOfInput" th:field="*{author}" required />
-    <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
-
-    <label for="yearOfProductionOfInput">Год издания:</label>
-    <input type="number" id="yearOfProductionOfInput" th:field="*{yearOfProduction}" required />
-    <div class="error" th:if="${#fields.hasErrors('yearOfProduction')}" th:errors="*{yearOfProduction}"></div>
-
-    <label for="annotationOfInput">Аннотация:</label>
-    <textarea id="annotationOfInput" th:field="*{annotation}" required></textarea>
-    <div class="error" th:if="${#fields.hasErrors('annotation')}" th:errors="*{annotation}"></div>
-
-    <input type="submit" value="Редактировать!" />
+  <form th:action="@{/books/edit/{id}(id=${Book.id})}" th:object="${Book}" method="post">
+    <input type="hidden" th:field="*{id}" />
+    <label for="name">Название:</label>
+    <input type="text" id="name" th:field="*{name}" />
+    <label for="author">Автор:</label>
+    <input type="text" id="author" th:field="*{author}" />
+    <label for="yearOfProduction">Год издания:</label>
+    <input type="number" id="yearOfProduction" th:field="*{yearOfProduction}" />
+    <label for="annotation">Аннотация:</label>
+    <textarea id="annotation" th:field="*{annotation}"></textarea>
+    <button type="submit">Сохранить</button>
   </form>
 </div>
 </body>
