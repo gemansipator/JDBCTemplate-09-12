@@ -1,5 +1,6 @@
 package site.javadev.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +36,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/auth/login", "/auth/registration", "/auth/logout").permitAll() // Разрешаем POST /auth/login
+                        .requestMatchers("/auth/login", "/auth/registration", "/auth/logout").permitAll()
                         .requestMatchers("/books").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/books/**").hasRole("ADMIN")
                         .requestMatchers("/people").hasAnyRole("USER", "ADMIN")
@@ -45,7 +46,7 @@ public class SecurityConfig {
                 )
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendRedirect("/auth/login");
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
                 })
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

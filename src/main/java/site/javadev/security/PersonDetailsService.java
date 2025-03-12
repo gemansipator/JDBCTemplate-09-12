@@ -1,7 +1,7 @@
 package site.javadev.security;
 
-import site.javadev.model.Person;
-import site.javadev.repositories.PersonRepository;
+import site.javadev.model.PersonSecurity;
+import site.javadev.repositories.PersonSecurityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,16 +13,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PersonDetailsService implements UserDetailsService {
 
-    private final PersonRepository personRepository;
+    private final PersonSecurityRepository personSecurityRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Person person = personRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
-        return User
-                .withUsername(person.getName())
-                .password(person.getPassword())
-                .roles(person.getRole().replace("ROLE_", ""))
+        PersonSecurity personSecurity = personSecurityRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        return User.builder()
+                .username(personSecurity.getUsername())
+                .password(personSecurity.getPassword())
+                .roles(personSecurity.getRole().replace("ROLE_", ""))
                 .build();
     }
 }

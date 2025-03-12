@@ -1,7 +1,7 @@
 package site.javadev.controllers;
 
 import site.javadev.model.Person;
-import site.javadev.service.PersonService;
+import site.javadev.service.PeopleService; // Исправлено на PeopleService
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,55 +13,56 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Controller // Обозначает, что этот класс является контроллером Spring MVC
-@RequestMapping(value = "/people", produces = "text/html; charset=UTF-8") // Базовый URL для работы с людьми
-@RequiredArgsConstructor // Автоматическое создание конструктора для final полей
+@Controller
+@RequestMapping(value = "/people", produces = "text/html; charset=UTF-8")
+@RequiredArgsConstructor
 public class PeopleController {
 
-    private final PersonService personService; // Сервис для работы с данными о людях
+    private final PeopleService personService; // Исправлено на PeopleService
 
     // Получение всех людей GET
     @GetMapping
     public String getAllPeople(Model model) {
         try {
-            List<Person> allPersons = personService.getAllPersons(); // Получаем список всех людей
-            model.addAttribute("keyAllPeoples", allPersons); // Передаем список в модель для отображения
-            return "people/view-with-all-people1"; // Шаблон отображения всех людей
+            List<Person> allPersons = personService.getAllReaders(); // Исправлено на getAllReaders
+            model.addAttribute("keyAllPeoples", allPersons);
+            return "people/view-with-all-people1";
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Ошибка при загрузке данных"); // Ошибка загрузки
-            return "people/error-view"; // Шаблон отображения ошибок
+            model.addAttribute("errorMessage", "Ошибка при загрузке данных");
+            return "people/error-view";
         }
     }
 
     // Добавление нового человека GET
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/create")
     public String giveToUserPageToCreateNewPerson(Model model) {
-        model.addAttribute("keyOfNewPerson", new Person()); // Добавляем объект для заполнения формы
-        return "people/view-to-create-new-person"; // Шаблон для добавления нового человека
+        model.addAttribute("keyOfNewPerson", new Person());
+        return "people/view-to-create-new-person";
     }
 
-    @GetMapping("/{id}/books") //на руках у текущего пользователя
+    @GetMapping("/{id}/books")
     public String getBooksOnHand(@PathVariable("id") Long id, Model model) {
-        Person person = personService.getPersonById(id);
+        Person person = personService.getPersonById(id); // Предполагается, что такой метод есть в PeopleService
         model.addAttribute("booksOnHand", person.getBooks());
         return "people/view-books-on-hand";
     }
 
     // Добавление нового человека POST
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public String createPerson(@ModelAttribute("keyOfNewPerson") @Valid Person person, BindingResult bindingResult) {
+    public String createPerson(@ModelAttribute("keyOfNewPerson") @Valid Person person,
+                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "people/view-to-create-new-person";
         }
         try {
-            // Заполнение обязательных полей, если они не заданы
+            // Заполнение обязательных полей
             if (person.getCreatedAt() == null) {
                 person.setCreatedAt(LocalDateTime.now());
             }
             if (person.getCreatedPerson() == null) {
-                person.setCreatedPerson("system");
+                person.setCreatedPerson("system"); // Можно заменить на имя текущего админа
             }
             if (person.getAge() == null) {
                 person.setAge(0);
@@ -72,12 +73,6 @@ public class PeopleController {
             if (person.getPhoneNumber() == null) {
                 person.setPhoneNumber("+1234567890");
             }
-            if (person.getPassword() == null) {
-                person.setPassword("defaultPassword");
-            }
-            if (person.getRole() == null) {
-                person.setRole("ROLE_USER");
-            }
 
             personService.savePerson(person);
             return "redirect:/people";
@@ -87,34 +82,34 @@ public class PeopleController {
     }
 
     // Получение человека по ID GET
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public String getPersonById(@PathVariable("id") Long id, Model model) {
-        Person personById = personService.getPersonById(id); // Получаем человека по ID
+        Person personById = personService.getPersonById(id);
         if (personById == null) {
-            model.addAttribute("errorMessage", "Человек не найден"); // Если человек не найден
-            return "people/error-view"; // Шаблон ошибки
+            model.addAttribute("errorMessage", "Человек не найден");
+            return "people/error-view";
         }
-        model.addAttribute("keyPersonById", personById); // Передаем человека в модель
-        model.addAttribute("books", personById.getBooks()); // Добавляем книги, связанные с человеком
-        return "people/view-with-person-by-id"; // Шаблон для отображения информации о человеке
+        model.addAttribute("keyPersonById", personById);
+        model.addAttribute("books", personById.getBooks());
+        return "people/view-with-person-by-id";
     }
 
     // Редактирование человека по ID GET
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editPerson(@PathVariable("id") Long id, Model model) {
-        Person personToBeEdited = personService.getPersonById(id); // Получаем данные человека для редактирования
+        Person personToBeEdited = personService.getPersonById(id);
         if (personToBeEdited == null) {
-            model.addAttribute("errorMessage", "Человек не найден"); // Если человек не найден
-            return "people/error-view"; // Шаблон ошибки
+            model.addAttribute("errorMessage", "Человек не найден");
+            return "people/error-view";
         }
-        model.addAttribute("keyOfPersonToBeEdited", personToBeEdited); // Передаем человека в модель
-        return "people/view-to-edit-person"; // Шаблон редактирования человека
+        model.addAttribute("keyOfPersonToBeEdited", personToBeEdited);
+        return "people/view-to-edit-person";
     }
 
     // Редактирование человека по ID POST
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit/{id}")
     public String editPerson(@PathVariable("id") Long id,
                              @ModelAttribute("keyOfPersonToBeEdited") @Valid Person personFromForm,
@@ -124,7 +119,7 @@ public class PeopleController {
         }
         personFromForm.setId(id);
 
-        // Заполнение обязательных полей, если они не заданы
+        // Заполнение обязательных полей
         if (personFromForm.getCreatedAt() == null) {
             personFromForm.setCreatedAt(LocalDateTime.now());
         }
@@ -140,22 +135,16 @@ public class PeopleController {
         if (personFromForm.getPhoneNumber() == null) {
             personFromForm.setPhoneNumber("+1234567890");
         }
-        if (personFromForm.getPassword() == null) {
-            personFromForm.setPassword("defaultPassword");
-        }
-        if (personFromForm.getRole() == null) {
-            personFromForm.setRole("ROLE_USER");
-        }
 
-        personService.updatePerson(personFromForm);
+        personService.savePerson(personFromForm); // Используем savePerson вместо updatePerson
         return "redirect:/people";
     }
 
-    // Удаление человека по ID DELETE
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    // Удаление человека по ID POST
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deletePerson(@PathVariable("id") Long id) {
-        personService.deletePerson(id); // Удаляем человека
-        return "redirect:/people"; // Перенаправление на список людей
+        personService.deletePerson(id); // Предполагается, что такой метод есть
+        return "redirect:/people";
     }
 }

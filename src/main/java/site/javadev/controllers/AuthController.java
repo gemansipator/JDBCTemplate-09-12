@@ -1,8 +1,6 @@
 package site.javadev.controllers;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import site.javadev.model.Person;
+import site.javadev.model.PersonSecurity;
 import site.javadev.security.JwtTokenProvider;
 import site.javadev.security.PersonDetailsService;
 import site.javadev.service.PeopleService;
@@ -15,6 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/auth")
@@ -29,20 +30,20 @@ public class AuthController {
 
     @GetMapping("/registration")
     public String registration(Model model) {
-        model.addAttribute("person", new Person());
+        model.addAttribute("person", new PersonSecurity());
         return "auth/registration";
     }
 
     @PostMapping("/registration")
-    public String register(@ModelAttribute("person") Person person,
+    public String register(@ModelAttribute("person") PersonSecurity personSecurity,
                            BindingResult bindingResult) {
-        System.out.println("Registering person: " + person);
-        personValidator.validate(person, bindingResult);
+        System.out.println("Registering person: " + personSecurity);
+        personValidator.validate(personSecurity, bindingResult);
         if (bindingResult.hasErrors()) {
             System.out.println("Validation errors: " + bindingResult.getAllErrors());
             return "auth/registration";
         }
-        peopleService.savePerson(person);
+        peopleService.savePersonSecurity(personSecurity);
         System.out.println("Redirecting to /auth/login");
         return "redirect:/auth/login";
     }
@@ -59,21 +60,24 @@ public class AuthController {
                         Model model) {
         System.out.println("Attempting login for: " + username);
         try {
+            // Аутентификация пользователя
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
             UserDetails userDetails = personDetailsService.loadUserByUsername(username);
-            System.out.println("User found: " + userDetails.getUsername() + ", authorities: " + userDetails.getAuthorities());
+
+            // Генерация JWT-токена
             String token = jwtTokenProvider.generateToken(userDetails.getUsername());
             Cookie jwtCookie = new Cookie("jwtToken", token);
-            jwtCookie.setHttpOnly(true);
-            jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(3600);
+            jwtCookie.setHttpOnly(true); // Защита от XSS
+            jwtCookie.setPath("/"); // Доступен для всего приложения
+            jwtCookie.setMaxAge(3600); // 1 час
             response.addCookie(jwtCookie);
+
             System.out.println("Login successful, token: " + token);
-            return "redirect:/";
+            return "redirect:/"; // Перенаправление на главную
         } catch (Exception e) {
             System.out.println("Login failed: " + e.getMessage());
             model.addAttribute("error", "Неправильные имя или пароль");
-            return "auth/login";
+            return "auth/login"; // Возврат страницы логина с ошибкой
         }
     }
 }

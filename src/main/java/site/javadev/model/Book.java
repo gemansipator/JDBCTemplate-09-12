@@ -9,20 +9,21 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "book")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private long id;
 
-    @Column(name = "name", nullable = false) // Переименовываем title на name
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "author", nullable = false)
     private String author;
 
-    @Column(name = "year_of_production", nullable = false) // Уточняем имя согласно заданию
+    @Column(name = "year_of_production", nullable = false)
     private int yearOfProduction;
 
     @Column(name = "annotation", nullable = false)
