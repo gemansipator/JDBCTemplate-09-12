@@ -1,92 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Редактирование книги</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .container {
-      background: #ffffff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-    h1 {
-      font-size: 1.8rem;
-      color: #333;
-      margin-bottom: 20px;
-    }
-    form {
-      width: 100%;
-    }
-    label {
-      font-size: 0.9rem;
-      color: #555;
-      display: block;
-      margin-bottom: 5px;
-      text-align: left;
-    }
-    input[type="text"], input[type="number"], textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.9rem;
-    }
-    .error {
-      color: red;
-      font-size: 0.8rem;
-      margin-bottom: 15px;
-      text-align: left;
-    }
-    input[type="submit"] {
-      width: 100%;
-      padding: 10px;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    input[type="submit"]:hover {
-      background-color: #0056b3;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; flex-direction: column; min-height: 100vh; }
+    .container { background: #ffffff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 90%; max-width: 400px; text-align: center; }
+    h1 { font-size: 1.8rem; color: #333; margin-bottom: 20px; }
+    form { width: 100%; }
+    label { font-size: 0.9rem; color: #555; display: block; margin-bottom: 5px; text-align: left; }
+    input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+    .error { color: red; font-size: 0.8rem; margin-bottom: 15px; text-align: left; }
+    input[type="submit"] { width: 100%; padding: 10px; background-color: #007BFF; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    input[type="submit"]:hover { background-color: #0056b3; }
   </style>
 </head>
 <body>
 <div class="container">
   <h1>Редактирование книги</h1>
-  <form th:method="post"
-        th:action="@{/books/edit/{id}(id=${Book.getId()})}"
-        th:object="${Book}">
-    <label for="titleOfInput">Название книги:</label>
-    <input type="text" id="titleOfInput" th:field="*{title}" required />
-    <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+  <form th:method="post" th:action="@{/books/edit/{id}(id=${book.id})}" th:object="${book}">
+    <label for="nameOfInput">Название книги:</label>
+    <input type="text" id="nameOfInput" th:field="*{name}" required />
+    <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
     <label for="authorOfInput">Автор:</label>
     <input type="text" id="authorOfInput" th:field="*{author}" required />
     <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
 
-    <label for="yearOfInput">Год издания:</label>
-    <input type="number" id="yearOfInput" th:field="*{year}" required />
-    <div class="error" th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+    <label for="yearOfProductionOfInput">Год издания:</label>
+    <input type="number" id="yearOfProductionOfInput" th:field="*{yearOfProduction}" required />
+    <div class="error" th:if="${#fields.hasErrors('yearOfProduction')}" th:errors="*{yearOfProduction}"></div>
 
     <label for="annotationOfInput">Аннотация:</label>
     <textarea id="annotationOfInput" th:field="*{annotation}" required></textarea>

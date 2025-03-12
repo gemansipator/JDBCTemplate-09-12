@@ -1,97 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Информация о пользователе</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    .person-info {
-      margin: 20px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .person-info p {
-      font-size: 1.1em;
-      margin: 10px 0;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    .actions form {
-      margin: 0;
-    }
-
-    .actions input {
-      padding: 10px 15px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #007BFF;
-      color: white;
-      transition: background-color 0.3s;
-    }
-
-    .actions input:hover {
-      background-color: #0056b3;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .person-info { margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
+    .person-info p { font-size: 1.1em; margin: 10px 0; }
+    .actions { display: flex; justify-content: space-between; margin-top: 20px; }
+    .actions form { margin: 0; }
+    .actions input { padding: 10px 15px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; background-color: #007BFF; color: white; transition: background-color 0.3s; }
+    .actions input:hover { background-color: #0056b3; }
   </style>
 </head>
 <body>
-
 <div class="person-info">
   <h1>Информация о пользователе</h1>
-  <p><strong>ФИО:</strong> <span th:text="${keyPersonById.getFullName()}"></span></p>
-  <p><strong>Год рождения:</strong> <span th:text="${keyPersonById.getBirthYear()}"></span></p>
-  <p><strong>Email:</strong> <span th:text="${keyPersonById.getEmail()}"></span></p>
-  <p><strong>Телефон:</strong> <span th:text="${keyPersonById.getPhoneNumber()}"></span></p>
-
+  <p><strong>ФИО:</strong> <span th:text="${keyPersonById.name}"></span></p>
+  <p><strong>Возраст:</strong> <span th:text="${keyPersonById.age}"></span></p>
+  <p><strong>Email:</strong> <span th:text="${keyPersonById.email}"></span></p>
+  <p><strong>Телефон:</strong> <span th:text="${keyPersonById.phoneNumber}"></span></p>
   <div th:if="${#lists.isEmpty(books)}">
     <p>Пользователь пока не взял ни одной книги</p>
   </div>
-
   <div th:unless="${#lists.isEmpty(books)}">
     <h2>Книги:</h2>
     <ul>
       <li th:each="book : ${books}">
-        <span th:text="${book.title}"></span>,
+        <span th:text="${book.name}"></span>,
         <span th:text="${book.author}"></span>,
-        <span th:text="${book.year}"></span>
+        <span th:text="${book.yearOfProduction}"></span>
       </li>
     </ul>
   </div>
-
   <div class="actions">
-    <form th:method="get" th:action="@{/people/edit/{id}(id=${keyPersonById.getId()})}">
+    <form th:method="get" th:action="@{/people/edit/{id}(id=${keyPersonById.id})}">
       <input type="submit" value="Редактировать" />
     </form>
-
-    <form th:method="post" th:action="@{/people/delete/{id}(id=${keyPersonById.getId()})}">
+    <form th:method="post" th:action="@{/people/delete/{id}(id=${keyPersonById.id})}">
       <input type="submit" value="Удалить" />
     </form>
   </div>
 </div>
-
 </body>
 </html>

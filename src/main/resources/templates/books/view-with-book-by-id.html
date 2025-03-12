@@ -1,121 +1,23 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Информация о книге</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1, h2 {
-      text-align: center;
-      color: #333;
-    }
-
-    .book-info {
-      margin: 20px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .book-info p {
-      font-size: 1.1em;
-      margin: 10px 0;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-
-    .actions form {
-      margin: 0;
-    }
-
-    .actions input, button {
-      padding: 10px 15px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .actions input[type="submit"], .actions button {
-      background-color: #007BFF;
-      color: white;
-      transition: background-color 0.3s;
-    }
-
-    .actions input[type="submit"]:hover, .actions button:hover {
-      background-color: #0056b3;
-    }
-
-    select {
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      margin-top: 10px;
-    }
-
-    .highlight {
-      color: #007BFF;
-      font-weight: bold;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+    h1 { text-align: center; font-size: 2em; color: #333; }
+    .book-info { margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
+    .book-info p { font-size: 1.1em; margin: 10px 0; }
   </style>
 </head>
 <body>
-
 <div class="book-info">
   <h1>Информация о книге</h1>
-  <p><strong>Название:</strong> <span th:text="${keyBookById.getTitle()}">Название книги</span></p>
-  <p><strong>Автор:</strong> <span th:text="${keyBookById.getAuthor()}">Автор книги</span></p>
-  <p><strong>Год выпуска:</strong> <span th:text="${keyBookById.getYear()}">Год выпуска</span></p>
-  <p><strong>Аннотация:</strong> <span th:text="${keyBookById.getAnnotation()}">Аннотация</span></p>
-
-  <div th:if="${keyBookById.owner != null}">
-    <p><strong>Книга сейчас у:</strong> <span th:text="${keyBookById.owner.getFullName()}" class="highlight">Имя владельца</span></p>
-    <form th:method="post" th:action="@{/books/loose/{id}(id=${keyBookById.getId()})}">
-      <input type="submit" value="Освободить книгу" />
-    </form>
-  </div>
-
-  <div th:if="${keyBookById.owner == null}">
-    <h2>Эта книга свободна</h2>
-    <form th:action="@{'/books/assign/' + ${keyBookById.id}}" method="post">
-      <label for="personId">Выберите владельца:</label>
-      <select id="personId" name="personId">
-        <option th:each="person : ${people}"
-                th:value="${person.id}"
-                th:text="${person.fullName}">
-          Человек
-        </option>
-      </select>
-      <button type="submit">Назначить владельца</button>
-    </form>
-  </div>
-
-  <div class="actions">
-    <form th:method="get" th:action="@{/books/edit/{id}(id=${keyBookById.getId()})}">
-      <input type="submit" value="Редактировать" />
-    </form>
-
-    <form th:method="post" th:action="@{/books/delete/{id}(id=${keyBookById.getId()})}">
-      <input type="submit" value="Удалить" />
-    </form>
-  </div>
+  <p><strong>Название:</strong> <span th:text="${book.name}"></span></p>
+  <p><strong>Автор:</strong> <span th:text="${book.author}"></span></p>
+  <p><strong>Год:</strong> <span th:text="${book.yearOfProduction}"></span></p>
+  <p><strong>Аннотация:</strong> <span th:text="${book.annotation}"></span></p>
 </div>
-
 </body>
 </html>

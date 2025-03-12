@@ -1,80 +1,30 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>All people</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2em;
-            color: #333;
-        }
-
-        .people-list {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-top: 20px;
-            padding: 0 20px;
-        }
-
-        .person-item {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .person-item span {
-            font-size: 1em;
-            margin-right: 15px;
-            color: #555;
-        }
-
-        .add-person-link {
-            display: inline-block;
-            text-align: center;
-            margin-top: 30px;
-            font-size: 1.5em;
-            color: #4CAF50;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            transition: background-color 0.3s;
-        }
-
-        .add-person-link:hover {
-            background-color: #e0f7e0;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        h1 { text-align: center; font-size: 2em; color: #333; }
+        .people-list { display: flex; flex-direction: column; align-items: flex-start; margin-top: 20px; padding: 0 20px; }
+        .person-item { display: flex; justify-content: flex-start; align-items: center; width: 100%; margin: 10px 0; padding: 10px; border-bottom: 1px solid #ccc; }
+        .person-item span { font-size: 1em; margin-right: 15px; color: #555; }
+        .add-person-link { display: inline-block; text-align: center; margin-top: 30px; font-size: 1.5em; color: #4CAF50; text-decoration: none; padding: 12px 20px; border-radius: 4px; background-color: #f9f9f9; transition: background-color 0.3s; }
+        .add-person-link:hover { background-color: #e0f7e0; }
     </style>
 </head>
 <body>
 <h1>Список пользователей</h1>
-
 <div class="people-list">
-    <!-- Цикл для отображения списка пользователей -->
     <div class="person-item" th:each="eachPerson : ${keyAllPeoples}">
-        <a th:href="@{/people/{id}(id=${eachPerson.getId()})}">
-            <span th:text="${eachPerson.getFullName()}"></span>
-            <span th:text="',' + ${eachPerson.getBirthYear()}"></span>
-            <span th:text="'Email: ' + ${eachPerson.getEmail()}"></span>
-            <span th:text="'Телефон: ' + ${eachPerson.getPhoneNumber()}"></span>
+        <a th:href="@{/people/{id}(id=${eachPerson.id})}">
+            <span th:text="${eachPerson.name}"></span>
+            <span th:text="',' + ${eachPerson.age}"></span>
+            <span th:text="'Email: ' + ${eachPerson.email}"></span>
+            <span th:text="'Телефон: ' + ${eachPerson.phoneNumber}"></span>
         </a>
     </div>
 </div>
-
-<!-- Ссылка для добавления нового пользователя -->
 <a class="add-person-link" th:href="@{/people/create}">Добавить пользователя</a>
 </body>
 </html>
