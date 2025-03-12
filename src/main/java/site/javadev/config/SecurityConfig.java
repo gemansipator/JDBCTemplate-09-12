@@ -33,8 +33,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                // Убираем STATELESS, используем сессии по умолчанию
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/auth/login", "/auth/registration", "/auth/logout").permitAll()
                         .requestMatchers("/books").hasAnyRole("USER", "ADMIN")
@@ -44,9 +43,20 @@ public class SecurityConfig {
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                // Настраиваем страницу логина
+                .formLogin(form -> form
+                        .loginPage("/auth/login") // Страница логина
+                        .permitAll()              // Доступна всем
+                        .defaultSuccessUrl("/", true) // Куда перенаправить после успешного логина
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout")
+                        .permitAll()
+                )
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                    response.sendRedirect("/auth/login"); // Редирект вместо 403
                 })
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

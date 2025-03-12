@@ -71,17 +71,17 @@
     <h1>Создание новой книги</h1>
 
     <form th:method="post" th:action="@{/books}" th:object="${keyOfNewBook}">
-        <label for="titleOfInput">Название книги:</label>
-        <input type="text" id="titleOfInput" th:field="*{title}" required />
-        <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+        <label for="nameOfInput">Название книги:</label>
+        <input type="text" id="nameOfInput" th:field="*{name}" required />
+        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
         <label for="authorOfInput">Автор:</label>
         <input type="text" id="authorOfInput" th:field="*{author}" required />
         <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
 
-        <label for="yearOfInput">Год издания:</label>
-        <input type="number" id="yearOfInput" th:field="*{year}" required />
-        <div class="error" th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+        <label for="yearOfProductionOfInput">Год издания:</label>
+        <input type="number" id="yearOfProductionOfInput" th:field="*{yearOfProduction}" required />
+        <div class="error" th:if="${#fields.hasErrors('yearOfProduction')}" th:errors="*{yearOfProduction}"></div>
 
         <label for="annotationOfInput">Аннотация:</label>
         <textarea id="annotationOfInput" th:field="*{annotation}" required></textarea>

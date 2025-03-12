@@ -43,9 +43,15 @@ public class AuthController {
             System.out.println("Validation errors: " + bindingResult.getAllErrors());
             return "auth/registration";
         }
-        peopleService.savePersonSecurity(personSecurity);
-        System.out.println("Redirecting to /auth/login");
-        return "redirect:/auth/login";
+        try {
+            peopleService.savePersonSecurity(personSecurity);
+            System.out.println("Redirecting to /auth/login");
+            return "redirect:/auth/login";
+        } catch (Exception e) {
+            System.out.println("Registration failed: " + e.getMessage());
+            bindingResult.reject("registration.error", "Ошибка при регистрации: " + e.getMessage());
+            return "auth/registration";
+        }
     }
 
     @GetMapping("/login")
