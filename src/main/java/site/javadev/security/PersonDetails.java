@@ -1,6 +1,6 @@
 package site.javadev.security;
 
-import site.javadev.model.PersonSecurity;
+import site.javadev.model.Person;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,26 +10,25 @@ import java.util.List;
 
 public class PersonDetails implements UserDetails {
 
-    private final PersonSecurity personSecurity;
+    private final Person person;
 
-    public PersonDetails(PersonSecurity personSecurity) {
-        this.personSecurity = personSecurity;
+    public PersonDetails(Person person) {
+        this.person = person;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = personSecurity.getRole();
-        return List.of(new SimpleGrantedAuthority(role));
+        return List.of(new SimpleGrantedAuthority(person.getRole()));
     }
 
     @Override
     public String getPassword() {
-        return personSecurity.getPassword();
+        return person.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return personSecurity.getUsername();
+        return person.getName(); // Используем name вместо username
     }
 
     @Override
@@ -50,5 +49,9 @@ public class PersonDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Person getPerson() {
+        return person;
     }
 }

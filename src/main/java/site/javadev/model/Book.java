@@ -1,35 +1,35 @@
 package site.javadev.model;
 
-import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
-import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter // Генерация геттеров для всех полей
-@Setter // Генерация сеттеров для всех полей
-@Entity // Обозначает, что это сущность для JPA
-@Table(name = "book") // Указывает название таблицы в базе данных
+@Getter
+@Setter
+@Entity
+@Table(name = "book")
 public class Book {
 
-    @Id // Указывает, что это первичный ключ
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоматическая генерация значения ключа
-    @Column(name = "id") // Название столбца в базе данных
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
-    @Column(name = "title", nullable = false)
-    private String title;
+    @Column(name = "name", nullable = false) // Переименовываем title на name
+    private String name;
 
     @Column(name = "author", nullable = false)
     private String author;
 
-    @Column(name = "year", nullable = false)
-    private int year;
+    @Column(name = "year_of_production", nullable = false) // Уточняем имя согласно заданию
+    private int yearOfProduction;
 
     @Column(name = "annotation", nullable = false)
-    private String annotation = "No annotation"; // Значение по умолчанию
+    private String annotation = "No annotation";
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now(); // Текущее время
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
@@ -38,7 +38,7 @@ public class Book {
     private LocalDateTime removedAt;
 
     @Column(name = "created_person", nullable = false)
-    private String createdPerson = "system"; // Значение по умолчанию
+    private String createdPerson = "system";
 
     @Column(name = "updated_person")
     private String updatedPerson;
@@ -46,7 +46,7 @@ public class Book {
     @Column(name = "removed_person")
     private String removedPerson;
 
-    @ManyToOne // Указывает связь "многие к одному" с сущностью Person
-    @JoinColumn(name = "owner_id") // Указывает, какой столбец в таблице связан с владельцем книги
-    private Person owner; // Владелец книги, связь с сущностью Person
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private Person owner;
 }

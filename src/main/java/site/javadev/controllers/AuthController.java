@@ -1,60 +1,89 @@
 package site.javadev.controllers;
 
-import site.javadev.model.PersonSecurity;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import site.javadev.model.Person;
+import site.javadev.security.JwtTokenProvider;
+import site.javadev.security.PersonDetailsService;
 import site.javadev.service.PeopleService;
 import site.javadev.validation.PersonValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-@Controller // Указывает, что класс является контроллером Spring MVC
-@RequestMapping("/auth") // Указывает базовый путь для всех обработчиков в этом контроллере
-@RequiredArgsConstructor // Автоматически генерирует конструктор для всех final полей
+@Controller
+@RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final PersonValidator personValidator; // Валидатор для проверки пользователя
-    private final PeopleService peopleService; // Сервис для работы с данными пользователей
+    private final PersonValidator personValidator;
+    private final PeopleService peopleService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final PersonDetailsService personDetailsService;
 
     @GetMapping("/login")
     public String login() {
         return "auth/login";
-        // Возвращает шаблон страницы для входа
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestParam String username,
+                        @RequestParam String password,
+                        HttpServletResponse response,
+                        Model model) {
+        try {
+            // Аутентификация пользователя
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+            // Загрузка данных пользователя
+            UserDetails userDetails = personDetailsService.loadUserByUsername(username);
+
+            // Генерация JWT-токена
+            String token = jwtTokenProvider.generateToken(userDetails.getUsername());
+
+            // Сохранение токена в cookie
+            Cookie jwtCookie = new Cookie("jwtToken", token);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(3600); // 1 час
+            response.addCookie(jwtCookie);
+
+            return "redirect:/"; // Перенаправление на главную страницу
+        } catch (Exception e) {
+            model.addAttribute("error", "Неправильные имя или пароль");
+            return "auth/login"; // Возврат на страницу логина с ошибкой
+        }
     }
 
     @GetMapping("/registration")
     public String registration(Model model) {
-        model.addAttribute("personSecurity", new PersonSecurity());
-        // Добавляет в модель новый объект PersonSecurity для передачи в форму регистрации
+        model.addAttribute("person", new Person());
         return "auth/registration";
-        // Возвращает шаблон страницы регистрации
     }
 
     @PostMapping("/registration")
-    public String register(@ModelAttribute("personSecurity") PersonSecurity personSecurity,
+    public String register(@ModelAttribute("person") Person person,
                            BindingResult bindingResult) {
-        personValidator.validate(personSecurity, bindingResult);
-        // Выполняет валидацию объекта PersonSecurity (например, проверяет наличие пользователя в базе)
+        personValidator.validate(person, bindingResult);
 
         if (bindingResult.hasErrors()) {
             return "auth/registration";
-            // Если есть ошибки валидации, возвращает пользователя на страницу регистрации
         }
 
-        peopleService.savePerson(personSecurity);
-        // Сохраняет нового пользователя в базе данных
-
+        peopleService.savePerson(person);
         return "redirect:/auth/login";
-        // Перенаправляет пользователя на страницу входа
     }
 
     @GetMapping("/admin")
     public String getAdminPage(Model model) {
         model.addAttribute("users", peopleService.getAllUsers());
-        // Передает список всех пользователей в модель для отображения на странице администратора
         return "auth/admin";
-        // Возвращает шаблон страницы администратора
     }
 
     @PostMapping("/admin/assign-role")
@@ -63,16 +92,21 @@ public class AuthController {
                              Model model) {
         try {
             peopleService.changeUserRole(username, role);
-            // Изменяет роль пользователя в базе данных
             model.addAttribute("successMessage", "Роль успешно изменена!");
-            // Добавляет сообщение об успешном изменении роли
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Ошибка: " + e.getMessage());
-            // Добавляет сообщение об ошибке, если что-то пошло не так
         }
         model.addAttribute("users", peopleService.getAllUsers());
-        // Обновляет список пользователей после изменения
         return "auth/admin";
-        // Возвращает пользователя на страницу администратора
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("jwtToken", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);
+        response.addCookie(jwtCookie);
+        return "redirect:/auth/login";
     }
 }

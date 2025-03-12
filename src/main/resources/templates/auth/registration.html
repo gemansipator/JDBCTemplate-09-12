@@ -35,7 +35,7 @@
             margin-bottom: 5px;
             display: block;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
             width: 100%;
             padding: 8px;
             margin-bottom: 15px;
@@ -78,17 +78,29 @@
 <body>
 <div class="container">
     <h1>Регистрация</h1>
-    <form th:method="POST" th:action="@{/auth/registration}" th:object="${personSecurity}">
-        <label for="username">Имя пользователя</label>
-        <input type="text" th:field="*{username}" id="username" required />
-        <div th:if="${#fields.hasErrors('username')}" class="error-message" th:errors="*{username}">
+    <form th:method="POST" th:action="@{/auth/registration}" th:object="${person}">
+        <label for="name">Имя пользователя</label>
+        <input type="text" th:field="*{name}" id="name" required />
+        <div th:if="${#fields.hasErrors('name')}" class="error-message" th:errors="*{name}">
             Ошибка в имени пользователя
         </div>
 
-        <label for="yearOfBirth">Год рождения</label>
-        <input type="text" th:field="*{yearOfBirth}" id="yearOfBirth" required />
-        <div th:if="${#fields.hasErrors('yearOfBirth')}" class="error-message" th:errors="*{yearOfBirth}">
-            Ошибка в годе рождения
+        <label for="age">Возраст</label>
+        <input type="number" th:field="*{age}" id="age" required />
+        <div th:if="${#fields.hasErrors('age')}" class="error-message" th:errors="*{age}">
+            Ошибка в возрасте
+        </div>
+
+        <label for="email">Email</label>
+        <input type="email" th:field="*{email}" id="email" required />
+        <div th:if="${#fields.hasErrors('email')}" class="error-message" th:errors="*{email}">
+            Ошибка в email
+        </div>
+
+        <label for="phoneNumber">Номер телефона</label>
+        <input type="text" th:field="*{phoneNumber}" id="phoneNumber" required />
+        <div th:if="${#fields.hasErrors('phoneNumber')}" class="error-message" th:errors="*{phoneNumber}">
+            Ошибка в номере телефона
         </div>
 
         <label for="password">Пароль</label>

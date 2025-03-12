@@ -1,7 +1,7 @@
 package site.javadev.security;
 
-import site.javadev.model.PersonSecurity;
-import site.javadev.repositories.PeopleRepository;
+import site.javadev.model.Person;
+import site.javadev.repositories.PersonRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,20 +12,18 @@ import java.util.Optional;
 @Service
 public class PersonDetailsService implements UserDetailsService {
 
-    private final PeopleRepository peopleRepository;
+    private final PersonRepository personRepository;
 
-    public PersonDetailsService(PeopleRepository peopleRepository) {
-        this.peopleRepository = peopleRepository;
+    public PersonDetailsService(PersonRepository personRepository) {
+        this.personRepository = personRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<PersonSecurity> person = peopleRepository.findByUsername(username);
-
+    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
+        Optional<Person> person = personRepository.findByName(name);
         if (person.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new UsernameNotFoundException("User not found with name: " + name);
         }
-
         return new PersonDetails(person.get());
     }
 }

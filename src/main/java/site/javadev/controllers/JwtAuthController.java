@@ -1,13 +1,14 @@
 package site.javadev.controllers;
 
-import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import site.javadev.security.JwtTokenProvider;
-import site.javadev.security.PersonDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import site.javadev.security.JwtTokenProvider;
+import site.javadev.security.PersonDetailsService;
 
 import java.util.Collections;
 
@@ -19,14 +20,18 @@ public class JwtAuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final PersonDetailsService personDetailsService;
 
-    public JwtAuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, PersonDetailsService personDetailsService) {
+    public JwtAuthController(AuthenticationManager authenticationManager,
+                             JwtTokenProvider jwtTokenProvider,
+                             PersonDetailsService personDetailsService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.personDetailsService = personDetailsService;
     }
 
     @PostMapping("/token")
-    public ResponseEntity<?> getToken(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<?> getToken(@RequestParam String username,
+                                      @RequestParam String password,
+                                      HttpServletResponse response) {
         // Аутентификация пользователя
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
@@ -34,11 +39,16 @@ public class JwtAuthController {
         UserDetails userDetails = personDetailsService.loadUserByUsername(username);
 
         // Генерация JWT-токена
-        String token = jwtTokenProvider.generateToken(userDetails);
+        String token = jwtTokenProvider.generateToken(userDetails.getUsername());
 
-        // Возвращаем токен в заголовке Authorization и в теле ответа
-        return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .body(Collections.singletonMap("token", token));
+        // Сохраняем токен в cookie
+        Cookie jwtCookie = new Cookie("jwtToken", token);
+        jwtCookie.setHttpOnly(true); // Защищаем cookie от JavaScript
+        jwtCookie.setPath("/"); // Доступно для всего приложения
+        jwtCookie.setMaxAge(3600); // Время жизни cookie (1 час, как в настройках JWT)
+        response.addCookie(jwtCookie);
+
+        // Перенаправляем на главную страницу
+        return ResponseEntity.ok().header("Location", "/").body(Collections.singletonMap("message", "Logged in"));
     }
 }
