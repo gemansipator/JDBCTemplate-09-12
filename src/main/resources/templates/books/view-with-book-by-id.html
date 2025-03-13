@@ -92,7 +92,6 @@
       <li><a th:href="@{/people}">Список читателей</a></li>
       <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/people/new}">Добавить читателя</a></li>
       <li><a th:href="@{/swagger-ui/index.html}" target="_blank">API</a></li>
-      <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
     </ul>
   </nav>
   <p><strong>Название:</strong> <span th:text="${keyBookById.name}"></span></p>
@@ -105,6 +104,12 @@
   </p>
   <p><strong>Обложка:</strong></p>
   <img th:src="@{${keyBookById.coverImage}}" alt="обложка книги" />
+  <br><br>
+  <nav>
+    <ul>
+      <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
+    </ul>
+  </nav>
 
   <!-- Кнопки для администратора -->
   <div sec:authorize="hasRole('ADMIN')">
