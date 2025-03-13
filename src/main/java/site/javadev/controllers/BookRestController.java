@@ -93,14 +93,18 @@ public class BookRestController {
             return ResponseEntity.notFound().build();
         }
 
-        // Извлекаем имя файла из пути (например, "/uploads/covers/UUID_file.jpg" -> "UUID_file.jpg")
         String fileName = book.getCoverImage().substring("/uploads/covers/".length());
         Path filePath = fileStorageService.getFilePath(fileName);
         Resource resource = new UrlResource(filePath.toUri());
 
         if (resource.exists() && resource.isReadable()) {
+            // Определяем тип контента по расширению файла
+            String contentType = fileName.endsWith(".png") ? MediaType.IMAGE_PNG_VALUE :
+                    fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") ? MediaType.IMAGE_JPEG_VALUE :
+                            MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // Можно уточнить по расширению
+                    .contentType(MediaType.parseMediaType(contentType))
                     .body(resource);
         } else {
             return ResponseEntity.notFound().build();
