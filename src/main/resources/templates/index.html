@@ -94,11 +94,7 @@
     <h2>API</h2>
     <nav>
       <ul>
-        <li><a th:href="@{/api/books}">API: Список книг</a></li>
-        </br>
-        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/api/books}">API: Создать книгу (POST)</a></li>
-        </br>
-        <li><a th:href="@{/api/people}">API: Список читателей</a></li>
+        <li><a th:href="@{/swagger-ui/index.html}" target="_blank">API для управления библиотекой</a></li>
       </ul>
     </nav>
   </div>
