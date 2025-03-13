@@ -29,6 +29,9 @@ public class Book {
     @Column(name = "annotation", nullable = false)
     private String annotation = "No annotation";
 
+    @Column(name = "cover_image") // Новое поле для пути к обложке
+    private String coverImage; // Например, "/uploads/covers/book_1.jpg"
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
