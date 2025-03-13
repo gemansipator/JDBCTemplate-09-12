@@ -1,10 +1,5 @@
-package site.javadev.controllers;
+package site.javadev.controller;
 
-import org.springframework.web.multipart.MultipartFile;
-import site.javadev.model.Book;
-import site.javadev.model.Person;
-import site.javadev.service.BookService;
-import site.javadev.service.PersonService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +7,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import site.javadev.model.Book;
+import site.javadev.model.Person;
+import site.javadev.service.BookService;
+import site.javadev.service.PersonService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
 @RequestMapping("/books")
 @RequiredArgsConstructor
 public class BooksController {
+
     private final BookService bookService;
     private final PersonService personService;
 
-    // Получить список книг
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public String getAllBooks(Model model) {
@@ -37,7 +37,6 @@ public class BooksController {
         }
     }
 
-    // Создание книги (форма создания)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/new")
     public String giveToUserPageToCreateNewBook(Model model) {
@@ -45,7 +44,6 @@ public class BooksController {
         return "books/view-to-create-new-book";
     }
 
-    // Управление книгами на руках
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/manage")
     public String manageBooksOnHand(Model model) {
@@ -54,7 +52,6 @@ public class BooksController {
         return "books/manage-books-on-hand";
     }
 
-    // Создание книги (обработка формы)
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book book,
@@ -76,7 +73,7 @@ public class BooksController {
             if (book.getCreatedPerson() == null) {
                 book.setCreatedPerson("system");
             }
-            bookService.saveBook(book, coverFile); // Изменил coverImage на coverFile
+            bookService.saveBook(book, coverFile);
             return "redirect:/books";
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,7 +81,6 @@ public class BooksController {
         }
     }
 
-    // Получение книги по ID
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public String getBookById(@PathVariable("id") Long id, Model model) {
@@ -98,7 +94,6 @@ public class BooksController {
         return "books/view-with-book-by-id";
     }
 
-    // Редактирование книги (форма редактирования)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) {
@@ -111,7 +106,6 @@ public class BooksController {
         return "books/view-to-edit-book";
     }
 
-    // Редактирование книги (обработка формы)
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id,
@@ -131,11 +125,10 @@ public class BooksController {
         if (bookFromForm.getCreatedPerson() == null) {
             bookFromForm.setCreatedPerson("system");
         }
-        bookService.saveBook(bookFromForm, coverFile); // Изменил coverImage на coverFile
+        bookService.saveBook(bookFromForm, coverFile);
         return "redirect:/books";
     }
 
-    // Удаление книги
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deleteBook(@PathVariable("id") Long id) {
@@ -143,7 +136,6 @@ public class BooksController {
         return "redirect:/books";
     }
 
-    // Назначение книги читателю
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
@@ -151,7 +143,6 @@ public class BooksController {
         return "redirect:/books/manage";
     }
 
-    // Снятие книги с читателя
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/loose/{id}")
     public String looseBook(@PathVariable("id") Long bookId) {

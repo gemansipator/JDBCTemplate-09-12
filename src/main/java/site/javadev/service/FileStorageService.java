@@ -12,32 +12,35 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/covers/";
+    private static final String UPLOAD_DIR = "uploads/covers/";
+    private final Path uploadPath;
 
     public FileStorageService() {
+        this.uploadPath = Paths.get(UPLOAD_DIR);
         try {
-            Files.createDirectories(Paths.get(UPLOAD_DIR));
+            Files.createDirectories(uploadPath); // Создаем директорию, если ее нет
+            System.out.println("Upload directory initialized at: " + uploadPath.toAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("Не удалось создать директорию для загрузки файлов: " + UPLOAD_DIR, e);
         }
     }
 
     public String storeFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("Файл не может быть пустым");
+        if (file == null || file.isEmpty()) {
+            return null; // Возвращаем null, если файл не передан
         }
-
         try {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+            Path filePath = uploadPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath);
-            return "/uploads/covers/" + fileName;
+            System.out.println("File saved at: " + filePath.toAbsolutePath());
+            return "/uploads/covers/" + fileName; // Относительный URL
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось сохранить файл: " + e.getMessage(), e);
+            throw new RuntimeException("Не удалось сохранить файл: " + file.getOriginalFilename(), e);
         }
     }
 
     public Path getFilePath(String fileName) {
-        return Paths.get(UPLOAD_DIR + fileName);
+        return uploadPath.resolve(fileName); // Возвращаем полный путь к файлу
     }
 }

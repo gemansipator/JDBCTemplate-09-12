@@ -1,7 +1,5 @@
-package site.javadev.controllers;
+package site.javadev.controller;
 
-import site.javadev.model.Book;
-import site.javadev.service.BookService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -9,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import site.javadev.model.Book;
+import site.javadev.service.BookService;
 import site.javadev.service.FileStorageService;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.List;
 public class BookRestController {
 
     private final BookService bookService;
-    private final FileStorageService fileStorageService; // Добавляем зависимость
+    private final FileStorageService fileStorageService;
 
     public BookRestController(BookService bookService, FileStorageService fileStorageService) {
         this.bookService = bookService;
@@ -40,20 +40,40 @@ public class BookRestController {
         return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Book> createBook(@RequestPart("book") Book book,
-                                           @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
+    public ResponseEntity<Book> createBook(
+            @RequestParam("name") String name,
+            @RequestParam("author") String author,
+            @RequestParam("yearOfProduction") int yearOfProduction,
+            @RequestParam(value = "annotation", defaultValue = "No annotation") String annotation,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage) {
+        Book book = new Book();
+        book.setName(name);
+        book.setAuthor(author);
+        book.setYearOfProduction(yearOfProduction);
+        book.setAnnotation(annotation);
+
         Book savedBook = bookService.saveBook(book, coverImage);
         return ResponseEntity.ok(savedBook);
     }
 
-    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id,
-                                           @RequestPart("book") Book book,
-                                           @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
+    public ResponseEntity<Book> updateBook(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam("author") String author,
+            @RequestParam("yearOfProduction") int yearOfProduction,
+            @RequestParam(value = "annotation", defaultValue = "No annotation") String annotation,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage) {
+        Book book = new Book();
         book.setId(id);
+        book.setName(name);
+        book.setAuthor(author);
+        book.setYearOfProduction(yearOfProduction);
+        book.setAnnotation(annotation);
+
         Book updatedBook = bookService.saveBook(book, coverImage);
         return ResponseEntity.ok(updatedBook);
     }
@@ -73,12 +93,14 @@ public class BookRestController {
             return ResponseEntity.notFound().build();
         }
 
-        Path filePath = fileStorageService.getFilePath(book.getCoverImage().substring("/static/covers/".length()));
+        // Извлекаем имя файла из пути (например, "/uploads/covers/UUID_file.jpg" -> "UUID_file.jpg")
+        String fileName = book.getCoverImage().substring("/uploads/covers/".length());
+        Path filePath = fileStorageService.getFilePath(fileName);
         Resource resource = new UrlResource(filePath.toUri());
 
         if (resource.exists() && resource.isReadable()) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // Предполагаем JPEG, можно уточнить по расширению
+                    .contentType(MediaType.IMAGE_JPEG) // Можно уточнить по расширению
                     .body(resource);
         } else {
             return ResponseEntity.notFound().build();

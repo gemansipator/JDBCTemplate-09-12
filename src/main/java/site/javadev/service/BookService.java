@@ -1,22 +1,27 @@
 package site.javadev.service;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
-import site.javadev.repositories.BookRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import site.javadev.repository.BookRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
     private final PersonService personService;
     private final FileStorageService fileStorageService;
+
+    public BookService(BookRepository bookRepository, PersonService personService, FileStorageService fileStorageService) {
+        this.bookRepository = bookRepository;
+        this.personService = personService;
+        this.fileStorageService = fileStorageService;
+    }
 
     public List<Book> findAll() {
         return bookRepository.findAll();
@@ -27,15 +32,16 @@ public class BookService {
     }
 
     @Transactional
-    public Book saveBook(Book book, MultipartFile coverFile) {
-        System.out.println("Saving book: " + book);
-        if (coverFile != null && !coverFile.isEmpty()) {
-            System.out.println("Processing cover file: " + coverFile.getOriginalFilename());
-            String filePath = fileStorageService.storeFile(coverFile);
-            book.setCoverImage(filePath);
-            System.out.println("Cover file saved at: " + filePath);
-        } else {
-            System.out.println("No cover file provided");
+    public Book saveBook(Book book, MultipartFile coverImage) {
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String coverImagePath = fileStorageService.storeFile(coverImage);
+            book.setCoverImage(coverImagePath);
+        }
+        if (book.getCreatedAt() == null) {
+            book.setCreatedAt(LocalDateTime.now());
+        }
+        if (book.getCreatedPerson() == null) {
+            book.setCreatedPerson("system");
         }
         return bookRepository.save(book);
     }

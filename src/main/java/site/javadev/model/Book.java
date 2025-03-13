@@ -33,10 +33,10 @@ public class Book {
 
     @NotEmpty(message = "Аннотация не может быть пустой")
     @Column(name = "annotation", nullable = false)
-    private String annotation = "No annotation";
+    private String annotation;
 
     @Column(name = "cover_image")
-    private String coverImage;
+    private String coverImage; // Путь к обложке
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -5,13 +5,11 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer { //Настройка доступа к статическим файлам
+public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+                .addResourceLocations("file:uploads/"); // Указываем на корень проекта
     }
 }
-/**
- * Теперь файлы из uploads/ будут доступны по URL, например, http://localhost:8080/uploads/covers/book_1.jpg.*/

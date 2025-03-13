@@ -1,38 +1,25 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Информация о книге</title>
   <style>
     body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
-    h1 { text-align: center; font-size: 2em; color: #333; }
-    .book-info { margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
-    .book-info p { font-size: 1.1em; margin: 10px 0; }
-    .edit-link { display: block; text-align: center; margin-top: 20px; }
-    .edit-link a { text-decoration: none; color: #fff; background-color: #007bff; padding: 10px 20px; border-radius: 5px; }
-    .edit-link a:hover { background-color: #0056b3; }
-    .cover-image { max-width: 100%; height: auto; margin-top: 20px; }
+    .book-container { margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
+    h1 { text-align: center; color: #333; }
+    img { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
-<div class="book-info">
+<div class="book-container">
   <h1>Информация о книге</h1>
   <p><strong>Название:</strong> <span th:text="${keyBookById.name}"></span></p>
   <p><strong>Автор:</strong> <span th:text="${keyBookById.author}"></span></p>
-  <p><strong>Год:</strong> <span th:text="${keyBookById.yearOfProduction}"></span></p>
+  <p><strong>Год издания:</strong> <span th:text="${keyBookById.yearOfProduction}"></span></p>
   <p><strong>Аннотация:</strong> <span th:text="${keyBookById.annotation}"></span></p>
-
-  <div th:if="${keyBookById.coverImage != null}">
-    <img th:src="${keyBookById.coverImage}" alt="Обложка книги" class="cover-image" />
-  </div>
-  <div th:unless="${keyBookById.coverImage != null}">
-    <p>Обложка отсутствует</p>
-  </div>
-
-  <div class="edit-link">
-    <a th:href="@{/books/edit/{id}(id=${keyBookById.id})}">Редактировать книгу</a>
-  </div>
+  <p><strong>Обложка:</strong></p>
+  <img th:src="@{${keyBookById.coverImage}}" alt="обложка книги" />
 </div>
 </body>
 </html>
