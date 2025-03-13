@@ -1,7 +1,5 @@
 package site.javadev.config;
 
-import site.javadev.security.JwtAuthenticationFilter;
-import site.javadev.security.PersonDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,10 +7,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import site.javadev.security.JwtAuthenticationFilter;
+import site.javadev.security.PersonDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -30,17 +31,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf().disable() // Отключаем CSRF, так как используем JWT для API
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Сессии только для веб, не для API
+                )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/login", "/auth/registration", "/auth/logout").permitAll()
+                        .requestMatchers("/auth/login", "/auth/registration", "/auth/logout", "/api/auth/login").permitAll() // Добавлен /api/auth/login
                         .requestMatchers("/api/**").authenticated() // API требует JWT
                         .requestMatchers("/books/**", "/people/**").authenticated() // Веб требует сессии
-                        .anyRequest().authenticated() // Все остальные ресурсы требуют аутентификации
+                        .anyRequest().authenticated()
                 )
-                .formLogin(form -> form  // направляет по форме после авторизации
+                .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/process_login")
-                        .defaultSuccessUrl("/", true) // Всегда перенаправлять на /books
+                        .defaultSuccessUrl("/", true) // Перенаправление на /books после логина
                         .failureUrl("/auth/login?error")
                         .permitAll()
                 )

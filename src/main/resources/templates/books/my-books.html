@@ -2,7 +2,7 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Управление книгами</title>
+    <title>Мои книги</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,28 +68,11 @@
         th {
             background-color: #f2f2f2;
         }
-        .btn {
-            display: inline-block;
-            padding: 8px 15px;
-            margin: 5px;
-            text-decoration: none;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            color: #000;
-        }
-        .btn-warning:hover {
-            background-color: #e0a800;
-        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Управление книгами</h1>
+    <h1>Мои книги</h1>
     <nav>
         <ul>
             <li><a th:href="@{/}">Главная</a></li>
@@ -101,6 +84,7 @@
             <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/people/new}">Добавить читателя</a></li>
             <li><a th:href="@{/books/my-books}">Мои книги</a></li>
             <li><a th:href="@{/swagger-ui/index.html}" target="_blank">API</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
         </ul>
     </nav>
     <table>
@@ -109,53 +93,19 @@
             <th>Название</th>
             <th>Автор</th>
             <th>Год</th>
-            <th>Владелец</th>
-            <th>Действия</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="book : ${allBooks}">
+        <tr th:each="book : ${myBooks}">
             <td><a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.name}"></a></td>
             <td th:text="${book.author}"></td>
             <td th:text="${book.yearOfProduction}"></td>
-            <td>
-                <span th:if="${book.owner != null}" th:text="${book.owner.name}"></span>
-                <span th:unless="${book.owner != null}">Свободна</span>
-            </td>
-            <td>
-                <!-- Для USER: кнопка "Взять себе" -->
-                <div sec:authorize="hasRole('USER') and !hasRole('ADMIN')" th:if="${book.owner == null}">
-                    <form th:action="@{/books/take/{id}(id=${book.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-warning">Взять себе</button>
-                    </form>
-                </div>
-                <!-- Для ADMIN: выбор читателя и освобождение -->
-                <div sec:authorize="hasRole('ADMIN')">
-                    <div th:if="${book.owner == null}">
-                        <form th:action="@{/books/assign/{id}(id=${book.id})}" method="post" style="display:inline;">
-                            <select name="personId">
-                                <option value="">Выберите читателя</option>
-                                <option th:each="person : ${allPeople}" th:value="${person.id}" th:text="${person.name}"></option>
-                            </select>
-                            <button type="submit" class="btn btn-warning">Назначить</button>
-                        </form>
-                    </div>
-                    <div th:if="${book.owner != null}">
-                        <form th:action="@{/books/loose/{id}(id=${book.id})}" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-warning">Освободить</button>
-                        </form>
-                    </div>
-                </div>
-            </td>
+        </tr>
+        <tr th:if="${myBooks == null or myBooks.isEmpty()}">
+            <td colspan="3">У вас нет книг на руках</td>
         </tr>
         </tbody>
     </table>
-    <br><br>
-    <nav>
-        <ul>
-            <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
-        </ul>
-    </nav>
 </div>
 </body>
 </html>

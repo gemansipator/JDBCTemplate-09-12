@@ -31,7 +31,7 @@ public class PeopleController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/new") // Изменено с "/create" на "/new"
+    @GetMapping("/new")
     public String giveToUserPageToCreateNewPerson(Model model) {
         model.addAttribute("keyOfNewPerson", new Person());
         return "people/view-to-create-new-person";
@@ -102,5 +102,27 @@ public class PeopleController {
     public String deletePerson(@PathVariable("id") Long id) {
         personService.deletePerson(id);
         return "redirect:/people";
+    }
+
+    // Новый метод для списка удаленных пользователей
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/deleted")
+    public String getAllDeletedPeople(Model model) {
+        try {
+            List<Person> deletedPersons = personService.getAllDeletedPersons();
+            model.addAttribute("keyAllDeletedPeoples", deletedPersons);
+            return "people/view-with-deleted-people";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Ошибка при загрузке данных удаленных пользователей");
+            return "people/error-view";
+        }
+    }
+
+    // Новый метод для восстановления пользователя
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/restore/{id}")
+    public String restorePerson(@PathVariable("id") Long id) {
+        personService.restorePerson(id);
+        return "redirect:/people/deleted";
     }
 }
