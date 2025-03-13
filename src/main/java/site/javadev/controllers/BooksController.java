@@ -1,5 +1,6 @@
 package site.javadev.controllers;
 
+import org.springframework.web.multipart.MultipartFile;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
 import site.javadev.service.BookService;
@@ -27,7 +28,7 @@ public class BooksController {
     @GetMapping
     public String getAllBooks(Model model) {
         try {
-            List<Book> allBooks = bookService.findAll(); // Заменил getAllBooks на findAll
+            List<Book> allBooks = bookService.findAll();
             model.addAttribute("keyAllBooks", allBooks);
             return "books/view-with-all-books";
         } catch (Exception e) {
@@ -45,22 +46,27 @@ public class BooksController {
     }
 
     // Управление книгами на руках
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Добавил права доступа
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/manage")
     public String manageBooksOnHand(Model model) {
-        model.addAttribute("allBooks", bookService.findAll()); // Заменил getAllBooks на findAll
+        model.addAttribute("allBooks", bookService.findAll());
         model.addAttribute("allPeople", personService.getAllPersons());
         return "books/manage-books-on-hand";
     }
 
     // Создание книги (обработка формы)
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book book, BindingResult bindingResult) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book book,
+                             BindingResult bindingResult,
+                             @RequestParam("coverFile") MultipartFile coverFile) {
         if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(error -> System.out.println(error.toString()));
             return "books/view-to-create-new-book";
         }
         try {
+            System.out.println("Creating book: " + book);
+            System.out.println("Cover file: " + (coverFile.isEmpty() ? "empty" : coverFile.getOriginalFilename()));
             if (book.getAnnotation() == null) {
                 book.setAnnotation("No annotation");
             }
@@ -70,9 +76,10 @@ public class BooksController {
             if (book.getCreatedPerson() == null) {
                 book.setCreatedPerson("system");
             }
-            bookService.saveBook(book);
+            bookService.saveBook(book, coverFile); // Изменил coverImage на coverFile
             return "redirect:/books";
         } catch (Exception e) {
+            e.printStackTrace();
             return "books/error-view";
         }
     }
@@ -100,7 +107,7 @@ public class BooksController {
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        model.addAttribute("Book", bookToBeEdited); // Исправил key с "Book" на "keyOfBookToBeEdited" для консистентности
+        model.addAttribute("keyOfBookToBeEdited", bookToBeEdited);
         return "books/view-to-edit-book";
     }
 
@@ -109,7 +116,8 @@ public class BooksController {
     @PostMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id,
                            @ModelAttribute("keyOfBookToBeEdited") @Valid Book bookFromForm,
-                           BindingResult bindingResult) {
+                           BindingResult bindingResult,
+                           @RequestParam(value = "coverFile", required = false) MultipartFile coverFile) {
         if (bindingResult.hasErrors()) {
             return "books/view-to-edit-book";
         }
@@ -123,7 +131,7 @@ public class BooksController {
         if (bookFromForm.getCreatedPerson() == null) {
             bookFromForm.setCreatedPerson("system");
         }
-        bookService.saveBook(bookFromForm);
+        bookService.saveBook(bookFromForm, coverFile); // Изменил coverImage на coverFile
         return "redirect:/books";
     }
 
@@ -139,15 +147,15 @@ public class BooksController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
-        bookService.assignBook(bookId, personId); // Заменил assignBookToPerson на assignBook
-        return "redirect:/books/manage"; // Перенаправление на страницу управления вместо книги
+        bookService.assignBook(bookId, personId);
+        return "redirect:/books/manage";
     }
 
     // Снятие книги с читателя
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/loose/{id}")
     public String looseBook(@PathVariable("id") Long bookId) {
-        bookService.looseBook(bookId); // Заменил removeBookFromPerson на looseBook
-        return "redirect:/books/manage"; // Перенаправление на страницу управления вместо книги
+        bookService.looseBook(bookId);
+        return "redirect:/books/manage";
     }
 }

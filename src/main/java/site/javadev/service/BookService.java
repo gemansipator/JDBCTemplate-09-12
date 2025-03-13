@@ -16,7 +16,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final PersonService personService;
-    private final FileStorageService fileStorageService; // Добавляем зависимость
+    private final FileStorageService fileStorageService;
 
     public List<Book> findAll() {
         return bookRepository.findAll();
@@ -27,10 +27,15 @@ public class BookService {
     }
 
     @Transactional
-    public Book saveBook(Book book, MultipartFile coverImage) { // Новый параметр
-        if (coverImage != null && !coverImage.isEmpty()) {
-            String filePath = fileStorageService.storeFile(coverImage);
+    public Book saveBook(Book book, MultipartFile coverFile) {
+        System.out.println("Saving book: " + book);
+        if (coverFile != null && !coverFile.isEmpty()) {
+            System.out.println("Processing cover file: " + coverFile.getOriginalFilename());
+            String filePath = fileStorageService.storeFile(coverFile);
             book.setCoverImage(filePath);
+            System.out.println("Cover file saved at: " + filePath);
+        } else {
+            System.out.println("No cover file provided");
         }
         return bookRepository.save(book);
     }

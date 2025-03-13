@@ -1,35 +1,44 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Редактирование книги</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; flex-direction: column; min-height: 100vh; }
-    .container { background: #ffffff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 90%; max-width: 400px; text-align: center; }
-    h1 { font-size: 1.8rem; color: #333; margin-bottom: 20px; }
-    form { width: 100%; }
-    label { font-size: 0.9rem; color: #555; display: block; margin-bottom: 5px; text-align: left; }
-    input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
-    .error { color: red; font-size: 0.8rem; margin-bottom: 15px; text-align: left; }
-    input[type="submit"] { width: 100%; padding: 10px; background-color: #007BFF; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .form-container { margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
+    label { font-size: 1.1em; margin-bottom: 10px; display: block; }
+    input[type="text"], input[type="number"], input[type="file"], textarea { width: 100%; padding: 10px; font-size: 1em; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; }
+    .error { color: red; font-size: 0.9em; }
+    input[type="submit"] { padding: 10px 15px; font-size: 1.1em; border: none; border-radius: 5px; cursor: pointer; background-color: #007BFF; color: white; transition: background-color 0.3s; width: 100%; }
     input[type="submit"]:hover { background-color: #0056b3; }
   </style>
 </head>
 <body>
-<div class="container">
+<div class="form-container">
   <h1>Редактирование книги</h1>
-  <form th:action="@{/books/edit/{id}(id=${Book.id})}" th:object="${Book}" method="post">
-    <input type="hidden" th:field="*{id}" />
-    <label for="name">Название:</label>
-    <input type="text" id="name" th:field="*{name}" />
-    <label for="author">Автор:</label>
-    <input type="text" id="author" th:field="*{author}" />
-    <label for="yearOfProduction">Год издания:</label>
-    <input type="number" id="yearOfProduction" th:field="*{yearOfProduction}" />
-    <label for="annotation">Аннотация:</label>
-    <textarea id="annotation" th:field="*{annotation}"></textarea>
-    <button type="submit">Сохранить</button>
+  <form th:method="post" th:action="@{/books/edit/{id}(id=${keyOfBookToBeEdited.id})}" th:object="${keyOfBookToBeEdited}" enctype="multipart/form-data">
+    <label for="nameOfInput">Название книги:</label>
+    <input type="text" id="nameOfInput" th:field="*{name}" required />
+    <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+
+    <label for="authorOfInput">Автор:</label>
+    <input type="text" id="authorOfInput" th:field="*{author}" required />
+    <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
+
+    <label for="yearOfProductionOfInput">Год издания:</label>
+    <input type="number" id="yearOfProductionOfInput" th:field="*{yearOfProduction}" required />
+    <div class="error" th:if="${#fields.hasErrors('yearOfProduction')}" th:errors="*{yearOfProduction}"></div>
+
+    <label for="annotationOfInput">Аннотация:</label>
+    <textarea id="annotationOfInput" th:field="*{annotation}" required></textarea>
+    <div class="error" th:if="${#fields.hasErrors('annotation')}" th:errors="*{annotation}"></div>
+
+    <label for="coverFile">Обложка:</label>
+    <input type="file" id="coverFile" name="coverFile" accept="image/*" />
+
+    <input type="submit" value="Сохранить изменения" />
   </form>
 </div>
 </body>

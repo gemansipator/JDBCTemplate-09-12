@@ -1,16 +1,18 @@
 package site.javadev.controllers;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import site.javadev.model.Book;
-import site.javadev.model.Person;
 import site.javadev.service.BookService;
-import site.javadev.service.PersonService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import site.javadev.service.FileStorageService;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -18,21 +20,17 @@ import java.util.List;
 public class BookRestController {
 
     private final BookService bookService;
+    private final FileStorageService fileStorageService; // Добавляем зависимость
 
-    public BookRestController(BookService bookService) {
+    public BookRestController(BookService bookService, FileStorageService fileStorageService) {
         this.bookService = bookService;
+        this.fileStorageService = fileStorageService;
     }
-
-    @Operation(summary = "Получить список всех книг", description = "Доступно для USER и ADMIN")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список книг успешно возвращён"),
-            @ApiResponse(responseCode = "403", description = "Доступ запрещён")
-    })
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<Book>> getAllBooks() {
-        return ResponseEntity.ok(bookService.findAll()); // Заменил getAllBooks на findAll
+        return ResponseEntity.ok(bookService.findAll());
     }
 
     @GetMapping("/{id}")
@@ -42,17 +40,22 @@ public class BookRestController {
         return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
-        return ResponseEntity.ok(bookService.saveBook(book));
+    public ResponseEntity<Book> createBook(@RequestPart("book") Book book,
+                                           @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
+        Book savedBook = bookService.saveBook(book, coverImage);
+        return ResponseEntity.ok(savedBook);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book book) {
+    public ResponseEntity<Book> updateBook(@PathVariable Long id,
+                                           @RequestPart("book") Book book,
+                                           @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
         book.setId(id);
-        return ResponseEntity.ok(bookService.saveBook(book));
+        Book updatedBook = bookService.saveBook(book, coverImage);
+        return ResponseEntity.ok(updatedBook);
     }
 
     @DeleteMapping("/{id}")
@@ -60,5 +63,25 @@ public class BookRestController {
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/cover")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Resource> getBookCover(@PathVariable Long id) throws IOException {
+        Book book = bookService.getBookById(id);
+        if (book == null || book.getCoverImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Path filePath = fileStorageService.getFilePath(book.getCoverImage().substring("/static/covers/".length()));
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (resource.exists() && resource.isReadable()) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG) // Предполагаем JPEG, можно уточнить по расширению
+                    .body(resource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
