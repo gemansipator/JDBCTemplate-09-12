@@ -24,6 +24,10 @@ public class BookService {
     }
 
 
+    public List<Book> getBooksByOwner(Long personId) {
+        return bookRepository.findByOwnerIdAndRemovedAtIsNull(personId);
+    }
+
     public List<Book> findAll() {
         return bookRepository.findByRemovedAtIsNull(); // Только активные книги
     }

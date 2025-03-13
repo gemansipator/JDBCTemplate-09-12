@@ -25,6 +25,8 @@ public class BooksController {
     private final BookService bookService;
     private final PersonService personService;
 
+
+
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public String getAllBooks(Model model) {
@@ -90,6 +92,21 @@ public class BooksController {
         bookService.saveBook(bookFromForm, coverFile);
         return "redirect:/books";
     }
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping("/my-books")
+    public String getMyBooks(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        System.out.println("DEBUG: Entering /my-books for user: " + userDetails.getUsername());
+        Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
+        if (currentUser == null) {
+            System.out.println("DEBUG: Current user not found for username: " + userDetails.getUsername());
+            return "redirect:/auth/login?error=userNotFound";
+        }
+        List<Book> myBooks = bookService.getBooksByOwner(currentUser.getId());
+        System.out.println("DEBUG: Found " + myBooks.size() + " books for user " + currentUser.getUsername());
+        model.addAttribute("myBooks", myBooks);
+        System.out.println("DEBUG: Returning template books/my-books");
+        return "books/my-books";
+    }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/manage")
@@ -98,6 +115,7 @@ public class BooksController {
         model.addAttribute("allPeople", personService.getAllPersons());
         return "books/manage-books-on-hand";
     }
+
 
     @PreAuthorize("hasRole('ADMIN')") // Только админы назначают любому человеку
     @PostMapping("/assign/{id}")

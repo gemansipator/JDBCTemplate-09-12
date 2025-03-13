@@ -91,6 +91,7 @@
       <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/books/deleted}">Удалённые книги</a></li>
       <li><a th:href="@{/people}">Список читателей</a></li>
       <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/people/new}">Добавить читателя</a></li>
+      <li><a th:href="@{/books/my-books}">Мои книги</a></li>
       <li><a th:href="@{/swagger-ui/index.html}" target="_blank">API</a></li>
     </ul>
   </nav>

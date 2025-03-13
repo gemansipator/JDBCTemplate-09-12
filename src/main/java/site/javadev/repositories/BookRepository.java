@@ -8,4 +8,5 @@ import java.util.List;
 public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findByRemovedAtIsNull(); // Только активные книги
     List<Book> findByRemovedAtIsNotNull(); // Только удалённые книги
+    List<Book> findByOwnerIdAndRemovedAtIsNull(Long ownerId);
 }
