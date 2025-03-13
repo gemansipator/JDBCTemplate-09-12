@@ -13,6 +13,9 @@
     .book-item a:hover { color: #0056b3; }
     .add-book-link { display: block; margin: 20px auto; text-align: center; font-size: 1.2em; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; transition: background-color 0.3s; }
     .add-book-link:hover { background-color: #45a049; }
+    .back-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -28,5 +31,7 @@
   </div>
 </div>
 <a class="add-book-link" th:href="@{/books/new}">Добавить книгу</a>
+</br></br>
+<a class="back-link" th:href="@{/}">На главную</a>
 </body>
 </html>

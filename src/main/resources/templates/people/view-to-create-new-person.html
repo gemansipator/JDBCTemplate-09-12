@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,13 +13,16 @@
         input[type="submit"] { width: 100%; padding: 10px; background-color: #007BFF; color: #fff; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; }
         input[type="submit"]:hover { background-color: #0056b3; }
         .error { color: red; font-size: 0.85rem; }
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Добавить читателя</h1>
     <form th:action="@{/people}" th:object="${keyOfNewPerson}" method="post">
-        <label for="username">Имя пользователя</label>
+        <label for="username">Имя для авторизации</label>
         <input type="text" id="username" th:field="*{username}" required />
         <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
 
@@ -27,7 +30,7 @@
         <input type="password" id="password" th:field="*{password}" required />
         <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
 
-        <label for="name">Имя</label>
+        <label for="name">Фамилия Имя Отчество</label>
         <input type="text" id="name" th:field="*{name}" required />
         <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
@@ -44,6 +47,8 @@
         <div class="error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
 
         <input type="submit" value="Создать" />
+        </br></br>
+        <a class="back-link" th:href="@{/}">На главную</a>
     </form>
 </div>
 </body>

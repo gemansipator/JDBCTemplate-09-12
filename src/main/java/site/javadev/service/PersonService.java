@@ -22,18 +22,31 @@ public class PersonService {
     public void savePerson(Person person) {
         try {
             System.out.println("Saving person: " + person.getUsername());
+
+            // Проверяем, есть ли уже пользователи в базе данных
+            boolean isFirstUser = personRepository.count() == 0;
+
+            // Устанавливаем роль пользователя
+            if (isFirstUser) {
+                person.setRole("ROLE_ADMIN"); // Первый пользователь получает ROLE_ADMIN
+            } else {
+                person.setRole("ROLE_USER"); // Остальные получают ROLE_USER
+            }
+
+            // Шифруем пароль
             if (person.getPassword() != null) {
                 person.setPassword(passwordEncoder.encode(person.getPassword()));
             }
-            if (person.getRole() == null) {
-                person.setRole("ROLE_USER");
-            }
+
+            // Устанавливаем дату создания и создателя, если они не заданы
             if (person.getCreatedAt() == null) {
                 person.setCreatedAt(LocalDateTime.now());
             }
             if (person.getCreatedPerson() == null) {
                 person.setCreatedPerson("system");
             }
+
+            // Сохраняем пользователя в базе данных
             personRepository.save(person);
             System.out.println("Person saved: " + person.getUsername());
         } catch (Exception e) {

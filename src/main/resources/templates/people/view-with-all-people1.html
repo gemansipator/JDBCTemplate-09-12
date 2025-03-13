@@ -11,6 +11,9 @@
         .person-item span { font-size: 1em; margin-right: 15px; color: #555; }
         .add-person-link { display: inline-block; text-align: center; margin-top: 30px; font-size: 1.5em; color: #4CAF50; text-decoration: none; padding: 12px 20px; border-radius: 4px; background-color: #f9f9f9; transition: background-color 0.3s; }
         .add-person-link:hover { background-color: #e0f7e0; }
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -26,5 +29,7 @@
     </div>
 </div>
 <a class="add-person-link" th:href="@{/people/new}">Добавить пользователя</a>
+</br></br>
+<a class="back-link" th:href="@{/}">На главную</a>
 </body>
 </html>

@@ -13,6 +13,9 @@
     .error { color: red; font-size: 0.9em; }
     input[type="submit"] { padding: 10px 15px; font-size: 1.1em; border: none; border-radius: 5px; cursor: pointer; background-color: #007BFF; color: white; transition: background-color 0.3s; width: 100%; }
     input[type="submit"]:hover { background-color: #0056b3; }
+    .back-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -39,6 +42,8 @@
     <input type="file" id="coverFile" name="coverFile" accept="image/*" />
 
     <input type="submit" value="Сохранить изменения" />
+    </br></br>
+    <a class="back-link" th:href="@{/}">На главную</a>
   </form>
 </div>
 </body>
