@@ -1,27 +1,64 @@
 package site.javadev.model;
 
-import jakarta.persistence.*; // Импорт аннотаций для работы с JPA
-import lombok.*; // Импорт аннотаций для генерации геттеров и сеттеров
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import java.util.List; // Импорт коллекции для списка книг
-
-@Getter // Генерация геттеров для всех полей
-@Setter // Генерация сеттеров для всех полей
-@Entity // Обозначает, что это сущность для JPA
-@Table(name = "person") // Указывает название таблицы в базе данных
+@Entity
+@Table(name = "person")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Person {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Id // Указывает, что это первичный ключ
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоматическая генерация значения ключа
-    @Column(name = "id") // Название столбца в базе данных
-    private long id;
+    @NotEmpty(message = "Поле не может быть пустым")
+    @Size(min = 2, max = 100, message = "Имя должно быть от 2 до 100 символов")
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "full_name", nullable = false, unique = true, length = 100) // Указывает столбец с ограничениями
-    private String fullName; // Полное имя человека
+    @Column(name = "age", nullable = false)
+    private int age;
 
-    @Column(name = "birth_year", nullable = false) // Указывает столбец с ограничением на не-null значение
-    private int birthYear; // Год рождения человека
+    @NotEmpty(message = "Поле не может быть пустым")
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = false) // Связь "один ко многим" с сущностью Book
-    private List<Book> books; // Список книг, принадлежащих человеку, связь с сущностью Book
+    @NotEmpty(message = "Поле не может быть пустым")
+    @Column(name = "phone_number", nullable = false, unique = true)
+    private String phoneNumber;
+
+    @NotEmpty(message = "Поле не может быть пустым")
+    @Size(min = 2, max = 20, message = "Имя пользователя должно быть от 2 до 20 символов")
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
+    @NotEmpty(message = "Поле не может быть пустым")
+    @Size(min = 4, message = "Пароль должен быть от 4 символов")
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "role", nullable = false)
+    private String role = "ROLE_USER";
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "removed_at")
+    private LocalDateTime removedAt;
+
+    @Column(name = "created_person", nullable = false)
+    private String createdPerson = "system";
+
+    @Column(name = "removed_person")
+    private String removedPerson;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Book> books;
 }

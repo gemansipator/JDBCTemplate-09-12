@@ -1,63 +1,71 @@
 package site.javadev.config;
 
+import site.javadev.security.JwtAuthenticationFilter;
 import site.javadev.security.PersonDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
-@Configuration // Класс является конфигурацией Spring
-@EnableWebSecurity // Включает веб-безопасность Spring Security
-@EnableMethodSecurity // Включает использование аннотаций для безопасности на уровне методов
+@Configuration
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private final PersonDetailsService personDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(PersonDetailsService personDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.personDetailsService = personDetailsService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, PersonDetailsService personDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/auth/login", "/auth/registration", "/auth/logout", "/error").permitAll()
-                        // Эти URL доступны без авторизации
-                        .requestMatchers("/books").hasAnyRole("USER", "ADMIN")
-                        // Доступ к /books только для ролей USER и ADMIN
-                        .requestMatchers("/books/**").hasRole("ADMIN")
-                        // Доступ к /books/** только для роли ADMIN
-                        .requestMatchers("/people").hasAnyRole("USER", "ADMIN")
-                        // Доступ к /people только для ролей USER и ADMIN
-                        .requestMatchers("/people/**").hasRole("ADMIN")
-                        // Доступ к /people/** только для роли ADMIN
-                        .requestMatchers("/auth/admin/**").hasRole("ADMIN")
-                        // Доступ к /auth/admin/** только для роли ADMIN
-                        .anyRequest().authenticated())
-                // Остальные запросы требуют аутентификации
-                .userDetailsService(personDetailsService)
-                // Указание кастомного UserDetailsService
-                .formLogin().loginPage("/auth/login")
-                // Указание страницы для формы входа
-                .loginProcessingUrl("/process_login")
-                // URL для обработки формы входа
-                .defaultSuccessUrl("/", true)
-                // Перенаправление после успешного входа
-                .failureUrl("/auth/login?error")
-                // Перенаправление при ошибке входа
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                // URL для выхода
-                .logoutSuccessUrl("/auth/login");
-        // Перенаправление после выхода
+                .csrf().disable()
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/auth/login", "/auth/registration", "/auth/logout").permitAll()
+                        .requestMatchers("/api/**").authenticated() // API требует JWT
+                        .requestMatchers("/books/**", "/people/**").authenticated() // Веб требует сессии
+                        .anyRequest().authenticated() // Все остальные ресурсы требуют аутентификации
+                )
+                .formLogin(form -> form  // направляет по форме после авторизации
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/process_login")
+                        .defaultSuccessUrl("/", true) // Всегда перенаправлять на /books
+                        .failureUrl("/auth/login?error")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/auth/login?logout")
+                        .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/auth/login");
+                        })
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-        // Возвращаем настроенную цепочку фильтров безопасности
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-        // Создание PasswordEncoder для шифрования паролей
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

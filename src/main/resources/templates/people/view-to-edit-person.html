@@ -1,31 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Edit Person</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; flex-direction: column; min-height: 100vh; }
+    .container { background: #ffffff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 90%; max-width: 400px; text-align: center; }
+    h1 { font-size: 1.8rem; color: #333; margin-bottom: 20px; }
+    form { width: 100%; }
+    label { font-size: 0.9rem; color: #555; display: block; margin-bottom: 5px; text-align: left; }
+    input[type="text"], input[type="number"], input[type="email"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+    .error { color: red; font-size: 0.8rem; margin-bottom: 15px; text-align: left; }
+    input[type="submit"] { width: 100%; padding: 10px; background-color: #007BFF; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    input[type="submit"]:hover { background-color: #0056b3; }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
+<div class="container">
+  <h1>Редактирование пользователя</h1>
+  <form th:method="post" th:action="@{/people/edit/{id}(id=${keyOfPersonToBeEdited.id})}" th:object="${keyOfPersonToBeEdited}">
+    <label for="nameOfInput">ФИО:</label>
+    <input type="text" id="nameOfInput" th:field="*{name}" required />
+    <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
-<form th:method="post"
-      th:action="@{/people/edit/{id}(id=${keyOfPersonToBeEdited.getId()})}"
-      th:object="${keyOfPersonToBeEdited}">
-  <label for="fullNameOfInput">Введите ФИО</label>
-  <input type="text" id="fullNameOfInput" th:field="*{fullName}" />
-  <div class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+    <label for="ageOfInput">Возраст:</label>
+    <input type="number" id="ageOfInput" th:field="*{age}" required />
+    <div class="error" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
 
-  <label for="birthYearOfInput">Введите год рождения</label>
-  <input type="number" id="birthYearOfInput" th:field="*{birthYear}" />
-  <div class="error" th:if="${#fields.hasErrors('birthYear')}" th:errors="*{birthYear}"></div>
+    <label for="emailOfInput">Email:</label>
+    <input type="email" id="emailOfInput" th:field="*{email}" required />
+    <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
 
+    <label for="phoneNumberOfInput">Телефон:</label>
+    <input type="text" id="phoneNumberOfInput" th:field="*{phoneNumber}" required />
+    <div class="error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
 
-
-
-  <input type="submit" value="Редактировать!" />
-
-
-
-
-</form>
-
+    <input type="submit" value="Редактировать!" />
+    </br></br>
+    <a class="back-link" th:href="@{/}">На главную</a>
+  </form>
+</div>
 </body>
 </html>

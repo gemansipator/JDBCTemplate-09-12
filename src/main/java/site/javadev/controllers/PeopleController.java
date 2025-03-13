@@ -12,95 +12,95 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller // Обозначает, что этот класс является контроллером Spring MVC
-@RequestMapping(value = "/people", produces = "text/html; charset=UTF-8") // Базовый URL для работы с людьми
-@RequiredArgsConstructor // Автоматическое создание конструктора для final полей
+@Controller
+@RequestMapping(value = "/people", produces = "text/html; charset=UTF-8")
+@RequiredArgsConstructor
 public class PeopleController {
+    private final PersonService personService;
 
-    private final PersonService personService; // Сервис для работы с данными о людях
-
-    // Получение всех людей GET
     @GetMapping
     public String getAllPeople(Model model) {
         try {
-            List<Person> allPersons = personService.getAllPersons(); // Получаем список всех людей
-            model.addAttribute("keyAllPeoples", allPersons); // Передаем список в модель для отображения
-            return "people/view-with-all-people1"; // Шаблон отображения всех людей
+            List<Person> allPersons = personService.getAllPersons();
+            model.addAttribute("keyAllPeoples", allPersons);
+            return "people/view-with-all-people1";
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Ошибка при загрузке данных"); // Ошибка загрузки
-            return "people/error-view"; // Шаблон отображения ошибок
+            model.addAttribute("errorMessage", "Ошибка при загрузке данных");
+            return "people/error-view";
         }
     }
 
-    // Добавление нового человека GET
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
-    @GetMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/new") // Изменено с "/create" на "/new"
     public String giveToUserPageToCreateNewPerson(Model model) {
-        model.addAttribute("keyOfNewPerson", new Person()); // Добавляем объект для заполнения формы
-        return "people/view-to-create-new-person"; // Шаблон для добавления нового человека
+        model.addAttribute("keyOfNewPerson", new Person());
+        return "people/view-to-create-new-person";
     }
 
-    // Добавление нового человека POST
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @GetMapping("/{id}/books")
+    public String getBooksOnHand(@PathVariable("id") Long id, Model model) {
+        Person person = personService.getPersonById(id);
+        model.addAttribute("booksOnHand", person.getBooks());
+        return "people/view-books-on-hand";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public String createPerson(@ModelAttribute("keyOfNewPerson") @Valid Person person, BindingResult bindingResult) {
+    public String createPerson(@ModelAttribute("keyOfNewPerson") @Valid Person person,
+                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "people/view-to-create-new-person"; // Вернуться к форме, если есть ошибки
+            return "people/view-to-create-new-person";
         }
         try {
-            personService.savePerson(person); // Сохраняем нового человека
-            return "redirect:/people"; // Перенаправление на список людей
+            personService.savePerson(person);
+            return "redirect:/people";
         } catch (Exception e) {
-            return "people/error-view"; // Шаблон ошибки
+            return "people/error-view";
         }
     }
 
-    // Получение человека по ID GET
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public String getPersonById(@PathVariable("id") Long id, Model model) {
-        Person personById = personService.getPersonById(id); // Получаем человека по ID
+        Person personById = personService.getPersonById(id);
         if (personById == null) {
-            model.addAttribute("errorMessage", "Человек не найден"); // Если человек не найден
-            return "people/error-view"; // Шаблон ошибки
+            model.addAttribute("errorMessage", "Человек не найден");
+            return "people/error-view";
         }
-        model.addAttribute("keyPersonById", personById); // Передаем человека в модель
-        model.addAttribute("books", personById.getBooks()); // Добавляем книги, связанные с человеком
-        return "people/view-with-person-by-id"; // Шаблон для отображения информации о человеке
+        model.addAttribute("keyPersonById", personById);
+        model.addAttribute("books", personById.getBooks());
+        return "people/view-with-person-by-id";
     }
 
-    // Редактирование человека по ID GET
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editPerson(@PathVariable("id") Long id, Model model) {
-        Person personToBeEdited = personService.getPersonById(id); // Получаем данные человека для редактирования
+        Person personToBeEdited = personService.getPersonById(id);
         if (personToBeEdited == null) {
-            model.addAttribute("errorMessage", "Человек не найден"); // Если человек не найден
-            return "people/error-view"; // Шаблон ошибки
+            model.addAttribute("errorMessage", "Человек не найден");
+            return "people/error-view";
         }
-        model.addAttribute("keyOfPersonToBeEdited", personToBeEdited); // Передаем человека в модель
-        return "people/view-to-edit-person"; // Шаблон редактирования человека
+        model.addAttribute("keyOfPersonToBeEdited", personToBeEdited);
+        return "people/view-to-edit-person";
     }
 
-    // Редактирование человека по ID POST
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit/{id}")
     public String editPerson(@PathVariable("id") Long id,
                              @ModelAttribute("keyOfPersonToBeEdited") @Valid Person personFromForm,
                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "people/view-to-edit-person"; // Вернуться к форме, если есть ошибки
+            return "people/view-to-edit-person";
         }
-        personFromForm.setId(id); // Устанавливаем ID для обновления
-        personService.updatePerson(personFromForm); // Обновляем данные человека
-        return "redirect:/people"; // Перенаправление на список людей
+        personFromForm.setId(id);
+        personService.savePerson(personFromForm);
+        return "redirect:/people";
     }
 
-    // Удаление человека по ID DELETE
-    @PreAuthorize("hasRole('ADMIN')") // Доступ только для администраторов
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
     public String deletePerson(@PathVariable("id") Long id) {
-        personService.deletePerson(id); // Удаляем человека
-        return "redirect:/people"; // Перенаправление на список людей
+        personService.deletePerson(id);
+        return "redirect:/people";
     }
 }

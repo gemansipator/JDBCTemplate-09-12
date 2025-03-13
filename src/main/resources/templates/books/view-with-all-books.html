@@ -1,87 +1,37 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Все книги</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 2em;
-      color: #333;
-    }
-
-    .books-list {
-      display: flex;
-      flex-direction: column;
-      margin-top: 20px;
-      padding: 0 20px;
-    }
-
-    .book-item {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .book-item a {
-      text-decoration: none;
-      color: #007BFF;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
-
-    .book-item a:hover {
-      color: #0056b3;
-    }
-
-    .add-book-link {
-      display: block;
-      margin: 20px auto;
-      text-align: center;
-      font-size: 1.2em;
-      color: #fff;
-      text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      background-color: #4CAF50;
-      transition: background-color 0.3s;
-    }
-
-    .add-book-link:hover {
-      background-color: #45a049;
+    body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+    h1 { text-align: center; font-size: 2em; color: #333; }
+    .books-list { display: flex; flex-direction: column; margin-top: 20px; padding: 0 20px; }
+    .book-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    .book-item a { text-decoration: none; color: #007BFF; font-weight: bold; transition: color 0.3s; }
+    .book-item a:hover { color: #0056b3; }
+    .add-book-link { display: block; margin: 20px auto; text-align: center; font-size: 1.2em; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; transition: background-color 0.3s; }
+    .add-book-link:hover { background-color: #45a049; }
+    .back-link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 <h1>Список книг</h1>
-
 <div class="books-list">
-  <!-- Цикл для отображения списка книг -->
   <div class="book-item" th:each="eachBook : ${keyAllBooks}">
     <a th:href="@{/books/{id}(id=${eachBook.id})}">
-      <span th:text="${eachBook.title}"></span>
+      <span th:text="${eachBook.name}"></span>
     </a>
     <span th:text="'Автор: ' + ${eachBook.author}"></span>
-    <span th:text="'Год: ' + ${eachBook.year}"></span>
+    <span th:text="'Год: ' + ${eachBook.yearOfProduction}"></span>
+    <span th:text="'Аннотация: ' + ${eachBook.annotation}"></span>
   </div>
 </div>
-
-<!-- Ссылка для добавления новой книги -->
 <a class="add-book-link" th:href="@{/books/new}">Добавить книгу</a>
+</br></br>
+<a class="back-link" th:href="@{/}">На главную</a>
 </body>
 </html>

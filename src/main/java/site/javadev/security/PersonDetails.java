@@ -1,55 +1,57 @@
 package site.javadev.security;
 
-import site.javadev.model.PersonSecurity; // Импорт модели PersonSecurity для работы с информацией пользователя
-import org.springframework.security.core.GrantedAuthority; // Импорт интерфейса для представления прав доступа
-import org.springframework.security.core.authority.SimpleGrantedAuthority; // Импорт реализации прав доступа
-import org.springframework.security.core.userdetails.UserDetails; // Импорт интерфейса для работы с деталями пользователя
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import site.javadev.model.Person;
 
-import java.util.Collection; // Импорт коллекции для хранения авторизационных данных
-import java.util.List; // Импорт списка для хранения прав доступа
+import java.util.Collection;
+import java.util.List;
 
-public class PersonDetails implements UserDetails { // Реализация интерфейса UserDetails для работы с деталями пользователя
+public class PersonDetails implements UserDetails {
 
-    private final PersonSecurity personSecurity; // Поле для хранения информации о пользователе
+    private final Person person;
 
-    // Конструктор для инициализации объекта PersonDetails
-    public PersonDetails(PersonSecurity personSecurity) {
-        this.personSecurity = personSecurity;
+    public PersonDetails(Person personSecurity) {
+        this.person = personSecurity;
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { // Возвращает права доступа пользователя
-        String role = personSecurity.getRole(); // Извлекаем роль пользователя
-        return List.of(new SimpleGrantedAuthority(role)); // Создаем и возвращаем список прав доступа
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(person.getRole()));
     }
 
     @Override
-    public String getPassword() { // Возвращает пароль пользователя
-        return personSecurity.getPassword();
+    public String getPassword() {
+        return person.getPassword();
     }
 
     @Override
-    public String getUsername() { // Возвращает имя пользователя
-        return personSecurity.getUsername();
+    public String getUsername() {
+        return person.getUsername();
     }
 
     @Override
-    public boolean isAccountNonExpired() { // Проверка, не истек ли срок действия аккаунта
-        return true; // Здесь всегда возвращаем true, можно добавить логику для реальной проверки
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
     @Override
-    public boolean isAccountNonLocked() { // Проверка, заблокирован ли аккаунт
-        return true; // Здесь всегда возвращаем true, можно добавить логику для реальной проверки
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
     @Override
-    public boolean isCredentialsNonExpired() { // Проверка, не истек ли срок действия учетных данных
-        return true; // Здесь всегда возвращаем true, можно добавить логику для реальной проверки
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
     @Override
-    public boolean isEnabled() { // Проверка, активен ли аккаунт
-        return true; // Здесь всегда возвращаем true, можно добавить логику для реальной проверки
+    public boolean isEnabled() {
+        return person.getRemovedAt() == null; // Учитываем удаление
+    }
+
+    public Person getPersonSecurity() {
+        return person;
     }
 }

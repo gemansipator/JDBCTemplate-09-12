@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,6 +31,12 @@
       color: #333;
       margin-bottom: 20px;
     }
+    h2 {
+      font-size: 1.5rem;
+      color: #555;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
     nav ul {
       list-style: none;
       padding: 0;
@@ -57,13 +63,48 @@
 <body>
 <div class="container">
   <h1>Библиотека</h1>
-  <nav>
-    <ul>
-      <li><a href="/books">Список книг</a></li>
-      </br>
-      <li><a href="/people">Список читателей</a></li>
-    </ul>
-  </nav>
+  <!-- Книги (веб-интерфейс) -->
+  <div sec:authorize="isAuthenticated()">
+    <h2>Книги</h2>
+    <nav>
+      <ul>
+        <li><a th:href="@{/books}">Список книг</a></li>
+        </br>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/books/new}">Добавить книгу</a></li>
+        </br>
+        <li><a th:href="@{/books/manage}">Управление книгами</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Читатели (веб-интерфейс) -->
+  <div sec:authorize="isAuthenticated()">
+    <h2>Читатели</h2>
+    <nav>
+      <ul>
+        <li><a th:href="@{/people}">Список читателей</a></li>
+        </br>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/people/new}">Добавить читателя</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- API (для разработчиков) -->
+  <div sec:authorize="isAuthenticated()">
+    <h2>API</h2>
+    <nav>
+      <ul>
+        <li><a th:href="@{/swagger-ui/index.html}" target="_blank">API для управления библиотекой</a></li>
+      </ul>
+    </nav>
+  </div>
 </div>
+<!-- Общие действия -->
+<h2>Выход из системы</h2>
+<nav>
+  <ul>
+    <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
+  </ul>
+</nav>
 </body>
 </html>

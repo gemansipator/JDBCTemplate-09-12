@@ -1,82 +1,55 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Create</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить читателя</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-        }
-
-        form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin: auto;
-            display: flex;
-            flex-direction: column; /* Вертикальное расположение элементов */
-            align-items: flex-start; /* Выравнивание по левому краю */
-        }
-
-        label {
-            font-size: 1.1em;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.1em;
-            align-self: flex-start; /* Кнопка тоже выровнена по левому краю */
-        }
-
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-top: -10px; /* Сдвиг ошибки ближе к полю */
-            margin-bottom: 20px;
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: #ffffff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 300px; }
+        h1 { font-size: 1.5rem; color: #333; margin-bottom: 20px; text-align: center; }
+        label { font-size: 0.9rem; color: #555; margin-bottom: 5px; display: block; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        input[type="submit"] { width: 100%; padding: 10px; background-color: #007BFF; color: #fff; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; }
+        input[type="submit"]:hover { background-color: #0056b3; }
+        .error { color: red; font-size: 0.85rem; }
+        .back-link:hover {
+            text-decoration: underline;
         }
     </style>
-
-
 </head>
 <body>
+<div class="container">
+    <h1>Добавить читателя</h1>
+    <form th:action="@{/people}" th:object="${keyOfNewPerson}" method="post">
+        <label for="username">Имя для авторизации</label>
+        <input type="text" id="username" th:field="*{username}" required />
+        <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
 
-<form th:method="post" th:action="@{/people}" th:object="${keyOfNewPerson}">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" th:field="*{password}" required />
+        <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
 
-    <label for="fullNameOfInput">Введите ФИО</label>
-    <input type="text" id="fullNameOfInput" th:field="*{fullName}" />
-    <div class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+        <label for="name">Фамилия Имя Отчество</label>
+        <input type="text" id="name" th:field="*{name}" required />
+        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
-    <label for="birthYearOfInput">Введите год рождения</label>
-    <input type="number" id="birthYearOfInput" th:field="*{birthYear}" />
-    <div class="error" th:if="${#fields.hasErrors('birthYear')}" th:errors="*{birthYear}"></div>
+        <label for="age">Возраст</label>
+        <input type="text" id="age" th:field="*{age}" required />
+        <div class="error" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
 
-    <input type="submit" value="Create!" />
-</form>
+        <label for="email">Email</label>
+        <input type="text" id="email" th:field="*{email}" required />
+        <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
 
+        <label for="phoneNumber">Телефон</label>
+        <input type="text" id="phoneNumber" th:field="*{phoneNumber}" required />
+        <div class="error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+
+        <input type="submit" value="Создать" />
+        </br></br>
+        <a class="back-link" th:href="@{/}">На главную</a>
+    </form>
+</div>
 </body>
 </html>

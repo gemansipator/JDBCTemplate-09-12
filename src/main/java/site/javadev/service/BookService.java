@@ -1,57 +1,83 @@
 package site.javadev.service;
 
-import site.javadev.model.Book; // Импорт модели Book для работы с книгами
-import site.javadev.model.Person; // Импорт модели Person для работы с людьми
-import site.javadev.repositories.BookRepository; // Импорт репозитория BookRepository для работы с базой данных
-import org.springframework.stereotype.Service; // Импорт аннотации Service для пометки класса как сервиса
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import site.javadev.model.Book;
+import site.javadev.model.Person;
+import site.javadev.repository.BookRepository;
 
-import java.util.List; // Импорт класса List для работы с коллекциями
+import java.time.LocalDateTime;
+import java.util.List;
 
-@Service // Аннотация, которая помечает класс как сервис и позволяет Spring управлять его жизненным циклом
+@Service
 public class BookService {
 
-    private final BookRepository bookRepository; // Репозиторий для работы с книгами
+    private final BookRepository bookRepository;
+    private final PersonService personService;
+    private final FileStorageService fileStorageService;
 
-    // Конструктор для внедрения зависимости репозитория
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, PersonService personService, FileStorageService fileStorageService) {
         this.bookRepository = bookRepository;
+        this.personService = personService;
+        this.fileStorageService = fileStorageService;
     }
 
-    // Получение всех книг из базы данных
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll(); // Возвращаем список всех книг
+    public List<Book> findAll() {
+        return bookRepository.findAll();
     }
 
-    // Получение книги по ее ID
     public Book getBookById(Long id) {
-        return bookRepository.findById(id).orElse(null); // Ищем книгу по ID, если не найдена - возвращаем null
+        return bookRepository.findById(id).orElse(null);
     }
 
-    // Сохранение новой книги или обновление существующей
-    public Book saveBook(Book book) {
-        return bookRepository.save(book); // Сохраняем или обновляем книгу в базе данных
+    @Transactional
+    public Book saveBook(Book book, MultipartFile coverImage) {
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String coverImagePath = fileStorageService.storeFile(coverImage);
+            book.setCoverImage(coverImagePath); // Сохраняем путь в формате /uploads/covers/{имя_файла}
+        }
+        if (book.getCreatedAt() == null) {
+            book.setCreatedAt(LocalDateTime.now());
+        }
+        if (book.getCreatedPerson() == null) {
+            book.setCreatedPerson("system");
+        }
+        return bookRepository.save(book);
     }
 
-    // Удаление книги по ID
+    @Transactional
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id); // Удаляем книгу из базы данных по ID
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
+
+        // Удаляем файл обложки, если он существует
+        if (book.getCoverImage() != null) {
+            String fileName = book.getCoverImage().substring("/uploads/covers/".length());
+            fileStorageService.deleteFile(fileName);
+        }
+
+        // Удаляем книгу из базы данных
+        bookRepository.delete(book);
     }
 
-    // Присваивание книги конкретному человеку
-    public void assignBookToPerson(Long bookId, Person person) {
-        Book book = bookRepository.findById(bookId).orElse(null); // Ищем книгу по ID
-        if (book != null) {
-            book.setOwner(person); // Присваиваем книгу владельцу
-            bookRepository.save(book); // Сохраняем изменения в базе данных
+    @Transactional
+    public void assignBook(Long bookId, Long personId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + bookId));
+        Person person = personService.getPersonById(personId);
+        if (person == null) {
+            throw new IllegalArgumentException("Person not found: " + personId);
         }
+        book.setOwner(person);
+        bookRepository.save(book);
     }
 
-    // Удаление книги у человека (снятие владельца)
-    public void removeBookFromPerson(Long bookId) {
-        Book book = bookRepository.findById(bookId).orElse(null); // Ищем книгу по ID
-        if (book != null) {
-            book.setOwner(null); // Убираем владельца книги
-            bookRepository.save(book); // Сохраняем изменения в базе данных
-        }
+    @Transactional
+    public void looseBook(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + bookId));
+        book.setOwner(null);
+        bookRepository.save(book);
     }
 }
