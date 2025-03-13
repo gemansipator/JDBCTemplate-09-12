@@ -1,5 +1,8 @@
 package site.javadev.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
 import site.javadev.service.BookService;
@@ -19,6 +22,12 @@ public class BookRestController {
     public BookRestController(BookService bookService) {
         this.bookService = bookService;
     }
+
+    @Operation(summary = "Получить список всех книг", description = "Доступно для USER и ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список книг успешно возвращён"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён")
+    })
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
