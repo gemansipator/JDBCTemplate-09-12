@@ -2,131 +2,159 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление книгами на руках</title>
+    <title>Управление книгами</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f9f9;
+            background-color: #f4f4f4;
             margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
         }
         .container {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
             max-width: 800px;
-            margin: 0 auto;
+            text-align: center;
         }
-        .books-list {
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .book-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .book-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .book-info a {
-            text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        .book-info a:hover {
-            color: #0056b3;
-        }
-        .owner-info {
-            color: #555;
-            font-size: 0.9rem;
-        }
-        .actions {
-            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 10px;
-            align-items: center;
         }
-        .actions form {
-            display: flex;
-            gap: 5px;
+        nav li {
+            display: inline-block;
         }
-        .actions select {
-            padding: 5px;
-            border: 1px solid #ccc;
+        nav a {
+            text-decoration: none;
+            font-size: 1rem;
+            color: #007BFF;
+            padding: 10px 20px;
+            border: 1px solid #007BFF;
             border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
         }
-        .actions button {
-            padding: 5px 10px;
-            border: none;
+        nav a:hover {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            text-decoration: none;
+            color: #fff;
             border-radius: 4px;
             cursor: pointer;
-            background-color: #007BFF;
-            color: white;
-            transition: background-color 0.3s;
+            border: none;
         }
-        .actions button:hover {
-            background-color: #0056b3;
+        .btn-warning {
+            background-color: #ffc107;
+            color: #000;
         }
-        .no-books {
-            text-align: center;
-            color: #777;
-            font-size: 1.1rem;
-            margin-top: 20px;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            text-decoration: none;
-            color: #007BFF;
-        }
-        .back-link:hover {
-            text-decoration: underline;
+        .btn-warning:hover {
+            background-color: #e0a800;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Управление книгами на руках</h1>
-    <div class="books-list">
-        <div th:unless="${#lists.isEmpty(allBooks)}" class="book-item" th:each="book : ${allBooks}">
-            <div class="book-info">
-                <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.name}"></a>
-                <span th:text="'Автор: ' + ${book.author}"></span>
-                <span th:text="'Год: ' + ${book.yearOfProduction}"></span>
-                <span class="owner-info" th:if="${book.owner != null}" th:text="'Выдана: ' + ${book.owner.name}"></span>
-                <span class="owner-info" th:unless="${book.owner != null}">Не выдана</span>
-            </div>
-            <div class="actions" sec:authorize="hasRole('ADMIN')">
-                <form th:action="@{/books/assign/{id}(id=${book.id})}" method="post" th:unless="${book.owner != null}">
-                    <select name="personId">
-                        <option value="" disabled selected>Выберите читателя</option>
-                        <option th:each="person : ${allPeople}" th:value="${person.id}" th:text="${person.name}"></option>
-                    </select>
-                    <button type="submit">Назначить</button>
-                </form>
-                <form th:action="@{/books/loose/{id}(id=${book.id})}" method="post" th:if="${book.owner != null}">
-                    <button type="submit">Освободить</button>
-                </form>
-            </div>
-        </div>
-        <div th:if="${#lists.isEmpty(allBooks)}" class="no-books">
-            Нет книг для управления
-        </div>
-    </div>
-    <a class="back-link" th:href="@{/}">На главную</a>
+    <h1>Управление книгами</h1>
+    <nav>
+        <ul>
+            <li><a th:href="@{/}">Главная</a></li>
+            <li><a th:href="@{/books}">Список книг</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/books/new}">Добавить книгу</a></li>
+            <li><a th:href="@{/books/manage}">Управление книгами</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/books/deleted}">Удалённые книги</a></li>
+            <li><a th:href="@{/people}">Список читателей</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/people/new}">Добавить читателя</a></li>
+            <li><a th:href="@{/swagger-ui/index.html}" target="_blank">API</a></li>
+        </ul>
+    </nav>
+    <table>
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Автор</th>
+            <th>Год</th>
+            <th>Владелец</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${allBooks}">
+            <td><a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.name}"></a></td>
+            <td th:text="${book.author}"></td>
+            <td th:text="${book.yearOfProduction}"></td>
+            <td>
+                <span th:if="${book.owner != null}" th:text="${book.owner.name}"></span>
+                <span th:unless="${book.owner != null}">Свободна</span>
+            </td>
+            <td>
+                <!-- Для USER: кнопка "Взять себе" -->
+                <div sec:authorize="hasRole('USER') and !hasRole('ADMIN')" th:if="${book.owner == null}">
+                    <form th:action="@{/books/take/{id}(id=${book.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-warning">Взять себе</button>
+                    </form>
+                </div>
+                <!-- Для ADMIN: выбор читателя и освобождение -->
+                <div sec:authorize="hasRole('ADMIN')">
+                    <div th:if="${book.owner == null}">
+                        <form th:action="@{/books/assign/{id}(id=${book.id})}" method="post" style="display:inline;">
+                            <select name="personId">
+                                <option value="">Выберите читателя</option>
+                                <option th:each="person : ${allPeople}" th:value="${person.id}" th:text="${person.name}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-warning">Назначить</button>
+                        </form>
+                    </div>
+                    <div th:if="${book.owner != null}">
+                        <form th:action="@{/books/loose/{id}(id=${book.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-warning">Освободить</button>
+                        </form>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <br><br>
+    <nav>
+        <ul>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
+        </ul>
+    </nav>
 </div>
 </body>
 </html>

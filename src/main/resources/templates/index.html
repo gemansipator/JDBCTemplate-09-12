@@ -23,7 +23,7 @@
       padding: 20px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       width: 90%;
-      max-width: 600px;
+      max-width: 800px; /* Увеличим ширину для горизонтальной навигации */
       text-align: center;
     }
     h1 {
@@ -40,10 +40,14 @@
     nav ul {
       list-style: none;
       padding: 0;
-      margin: 0;
+      margin: 10px 0;
+      display: flex; /* Горизонтальное расположение */
+      flex-wrap: wrap; /* Перенос на новую строку, если не помещается */
+      justify-content: center;
+      gap: 10px; /* Отступ между кнопками */
     }
     nav li {
-      margin: 10px 0;
+      display: inline-block;
     }
     nav a {
       text-decoration: none;
@@ -69,10 +73,9 @@
     <nav>
       <ul>
         <li><a th:href="@{/books}">Список книг</a></li>
-        </br>
         <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/books/new}">Добавить книгу</a></li>
-        </br>
         <li><a th:href="@{/books/manage}">Управление книгами</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/books/deleted}">Удалённые книги</a></li>
       </ul>
     </nav>
   </div>
@@ -83,7 +86,6 @@
     <nav>
       <ul>
         <li><a th:href="@{/people}">Список читателей</a></li>
-        </br>
         <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/people/new}">Добавить читателя</a></li>
       </ul>
     </nav>
@@ -98,13 +100,16 @@
       </ul>
     </nav>
   </div>
+
+  <!-- Общие действия -->
+  <div sec:authorize="isAuthenticated()">
+    <h2>Выход</h2>
+    <nav>
+      <ul>
+        <li><a th:href="@{/logout}">Выйти</a></li>
+      </ul>
+    </nav>
+  </div>
 </div>
-<!-- Общие действия -->
-<h2>Выход из системы</h2>
-<nav>
-  <ul>
-    <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></li>
-  </ul>
-</nav>
 </body>
 </html>

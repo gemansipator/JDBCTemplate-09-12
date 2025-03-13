@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
-import site.javadev.repository.BookRepository;
+import site.javadev.repositories.BookRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,8 +23,9 @@ public class BookService {
         this.fileStorageService = fileStorageService;
     }
 
+
     public List<Book> findAll() {
-        return bookRepository.findAll();
+        return bookRepository.findByRemovedAtIsNull(); // Только активные книги
     }
 
     public Book getBookById(Long id) {
@@ -35,7 +36,7 @@ public class BookService {
     public Book saveBook(Book book, MultipartFile coverImage) {
         if (coverImage != null && !coverImage.isEmpty()) {
             String coverImagePath = fileStorageService.storeFile(coverImage);
-            book.setCoverImage(coverImagePath); // Сохраняем путь в формате /uploads/covers/{имя_файла}
+            book.setCoverImage(coverImagePath);
         }
         if (book.getCreatedAt() == null) {
             book.setCreatedAt(LocalDateTime.now());
@@ -50,15 +51,20 @@ public class BookService {
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
-
-        // Удаляем файл обложки, если он существует
         if (book.getCoverImage() != null) {
             String fileName = book.getCoverImage().substring("/uploads/covers/".length());
             fileStorageService.deleteFile(fileName);
         }
+        bookRepository.delete(book); // Полное удаление
+    }
 
-        // Удаляем книгу из базы данных
-        bookRepository.delete(book);
+    @Transactional
+    public void softDeleteBook(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
+        book.setRemovedAt(LocalDateTime.now());
+        book.setRemovedPerson("system");
+        bookRepository.save(book); // Мягкое удаление
     }
 
     @Transactional
@@ -79,5 +85,18 @@ public class BookService {
                 .orElseThrow(() -> new IllegalArgumentException("Book not found: " + bookId));
         book.setOwner(null);
         bookRepository.save(book);
+    }
+
+    public List<Book> getAllDeletedBooks() {
+        return bookRepository.findByRemovedAtIsNotNull(); // Список удалённых книг
+    }
+
+    @Transactional
+    public void restoreBook(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
+        book.setRemovedAt(null);
+        book.setRemovedPerson(null);
+        bookRepository.save(book); // Восстановление
     }
 }
