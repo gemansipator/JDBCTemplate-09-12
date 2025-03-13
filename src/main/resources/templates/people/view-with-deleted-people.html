@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Удаленные пользователи</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        h1 { text-align: center; font-size: 2em; color: #333; }
+        .people-list { display: flex; flex-direction: column; align-items: flex-start; margin-top: 20px; padding: 0 20px; }
+        .person-item { display: flex; justify-content: flex-start; align-items: center; width: 100%; margin: 10px 0; padding: 10px; border-bottom: 1px solid #ccc; }
+        .person-item span { font-size: 1em; margin-right: 15px; color: #555; }
+        .restore-button { font-size: 1em; color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 4px; background-color: #4CAF50; border: none; cursor: pointer; transition: background-color 0.3s; }
+        .restore-button:hover { background-color: #45a049; }
+        .back-link { display: inline-block; text-align: center; margin-top: 30px; font-size: 1.5em; color: #4CAF50; text-decoration: none; padding: 12px 20px; border-radius: 4px; background-color: #f9f9f9; transition: background-color 0.3s; }
+        .back-link:hover { background-color: #e0f7e0; }
+    </style>
+</head>
+<body>
+<h1>Список удаленных пользователей</h1>
+<div class="people-list">
+    <div class="person-item" th:each="eachPerson : ${keyAllDeletedPeoples}">
+        <span th:text="${eachPerson.name}"></span>
+        <span th:text="',' + ${eachPerson.age}"></span>
+        <span th:text="'Email: ' + ${eachPerson.email}"></span>
+        <span th:text="'Телефон: ' + ${eachPerson.phoneNumber}"></span>
+        <span th:text="'Удален: ' + ${#temporals.format(eachPerson.removedAt, 'dd.MM.yyyy HH:mm')}"></span>
+        <form th:action="@{/people/restore/{id}(id=${eachPerson.id})}" method="post" style="display:inline;">
+            <button type="submit" class="restore-button" onclick="return confirm('Вы уверены, что хотите восстановить пользователя?');">Восстановить</button>
+        </form>
+    </div>
+    <div th:if="${keyAllDeletedPeoples == null or keyAllDeletedPeoples.isEmpty()}">
+        <p>Нет удаленных пользователей</p>
+    </div>
+</div>
+<a class="back-link" th:href="@{/people}">Назад к списку активных пользователей</a>
+</body>
+</html>

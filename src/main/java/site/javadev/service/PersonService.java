@@ -23,22 +23,17 @@ public class PersonService {
         try {
             System.out.println("Saving person: " + person.getUsername());
 
-            // Проверяем, есть ли уже пользователи в базе данных
             boolean isFirstUser = personRepository.count() == 0;
-
-            // Устанавливаем роль пользователя
             if (isFirstUser) {
-                person.setRole("ROLE_ADMIN"); // Первый пользователь получает ROLE_ADMIN
+                person.setRole("ROLE_ADMIN");
             } else {
-                person.setRole("ROLE_USER"); // Остальные получают ROLE_USER
+                person.setRole("ROLE_USER");
             }
 
-            // Шифруем пароль
             if (person.getPassword() != null) {
                 person.setPassword(passwordEncoder.encode(person.getPassword()));
             }
 
-            // Устанавливаем дату создания и создателя, если они не заданы
             if (person.getCreatedAt() == null) {
                 person.setCreatedAt(LocalDateTime.now());
             }
@@ -46,7 +41,6 @@ public class PersonService {
                 person.setCreatedPerson("system");
             }
 
-            // Сохраняем пользователя в базе данных
             personRepository.save(person);
             System.out.println("Person saved: " + person.getUsername());
         } catch (Exception e) {
@@ -65,7 +59,13 @@ public class PersonService {
     }
 
     public List<Person> getAllPersons() {
-        return personRepository.findAll();
+        return personRepository.findByRemovedAtIsNull();
+    }
+
+    // Новый метод для получения удаленных пользователей
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Person> getAllDeletedPersons() {
+        return personRepository.findByRemovedAtIsNotNull();
     }
 
     public Person getPersonById(Long id) {
@@ -79,6 +79,16 @@ public class PersonService {
         Person person = getPersonById(id);
         person.setRemovedAt(LocalDateTime.now());
         person.setRemovedPerson("system");
+        personRepository.save(person);
+    }
+
+    // Новый метод для восстановления пользователя
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void restorePerson(Long id) {
+        Person person = getPersonById(id);
+        person.setRemovedAt(null);
+        person.setRemovedPerson(null);
         personRepository.save(person);
     }
 }
