@@ -3,9 +3,10 @@ package site.javadev.service;
 import org.springframework.transaction.annotation.Transactional;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
-import site.javadev.repositories.BookRepository; // Исправлен импорт
+import site.javadev.repositories.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,30 +16,30 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final PersonService personService;
+    private final FileStorageService fileStorageService; // Добавляем зависимость
 
-    // Получение всех книг
     public List<Book> findAll() {
         return bookRepository.findAll();
     }
 
-    // Получение книги по ID
     public Book getBookById(Long id) {
         return bookRepository.findById(id).orElse(null);
     }
 
-    // Сохранение книги
     @Transactional
-    public Book saveBook(Book book) {
+    public Book saveBook(Book book, MultipartFile coverImage) { // Новый параметр
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String filePath = fileStorageService.storeFile(coverImage);
+            book.setCoverImage(filePath);
+        }
         return bookRepository.save(book);
     }
 
-    // Удаление книги по ID
     @Transactional
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
     }
 
-    // Назначение книги человеку
     @Transactional
     public void assignBook(Long bookId, Long personId) {
         Book book = bookRepository.findById(bookId)
@@ -51,7 +52,6 @@ public class BookService {
         bookRepository.save(book);
     }
 
-    // Освобождение книги
     @Transactional
     public void looseBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
