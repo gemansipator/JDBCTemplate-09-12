@@ -35,7 +35,7 @@ public class BookService {
     public Book saveBook(Book book, MultipartFile coverImage) {
         if (coverImage != null && !coverImage.isEmpty()) {
             String coverImagePath = fileStorageService.storeFile(coverImage);
-            book.setCoverImage(coverImagePath);
+            book.setCoverImage(coverImagePath); // Сохраняем путь в формате /uploads/covers/{имя_файла}
         }
         if (book.getCreatedAt() == null) {
             book.setCreatedAt(LocalDateTime.now());
@@ -48,7 +48,17 @@ public class BookService {
 
     @Transactional
     public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
+
+        // Удаляем файл обложки, если он существует
+        if (book.getCoverImage() != null) {
+            String fileName = book.getCoverImage().substring("/uploads/covers/".length());
+            fileStorageService.deleteFile(fileName);
+        }
+
+        // Удаляем книгу из базы данных
+        bookRepository.delete(book);
     }
 
     @Transactional

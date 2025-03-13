@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,6 +20,14 @@
   <p><strong>Аннотация:</strong> <span th:text="${keyBookById.annotation}"></span></p>
   <p><strong>Обложка:</strong></p>
   <img th:src="@{${keyBookById.coverImage}}" alt="обложка книги" />
+  <!-- Кнопки для администратора -->
+  <div sec:authorize="hasRole('ADMIN')">
+    <a th:href="@{/books/edit/{id}(id=${keyBookById.id})}" class="btn btn-primary">Редактировать</a>
+    <form th:action="@{/books/delete/{id}(id=${keyBookById.id})}" method="post" style="display:inline;">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить книгу?');">Удалить</button>
+    </form>
+  </div>
+  <a href="/books">Назад к списку книг</a>
 </div>
 </body>
 </html>
