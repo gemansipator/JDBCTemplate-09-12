@@ -1,5 +1,6 @@
 package site.javadev.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,27 +13,24 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
     private final PersonService personService;
     private final FileStorageService fileStorageService;
 
-    public BookService(BookRepository bookRepository, PersonService personService, FileStorageService fileStorageService) {
-        this.bookRepository = bookRepository;
-        this.personService = personService;
-        this.fileStorageService = fileStorageService;
-    }
-
-
+    @Transactional
     public List<Book> getBooksByOwner(Long personId) {
         return bookRepository.findByOwnerIdAndRemovedAtIsNull(personId);
     }
 
+    @Transactional
     public List<Book> findAll() {
         return bookRepository.findByRemovedAtIsNull(); // Только активные книги
     }
 
+    @Transactional
     public Optional<Book> getBookById(Long id) {
         return bookRepository.findById(id);
     }
