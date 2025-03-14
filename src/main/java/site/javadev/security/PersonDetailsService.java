@@ -1,5 +1,6 @@
 package site.javadev.security;
 
+import lombok.RequiredArgsConstructor;
 import site.javadev.model.Person;
 import site.javadev.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Service
+@RequiredArgsConstructor
 public class PersonDetailsService implements UserDetailsService {
     private final PersonRepository personRepository;
-
-    @Autowired
-    public PersonDetailsService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
