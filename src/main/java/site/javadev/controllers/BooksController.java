@@ -2,6 +2,8 @@ package site.javadev.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +24,8 @@ import java.util.Optional;
 @RequestMapping("/books")
 @RequiredArgsConstructor
 public class BooksController {
+
+    private static final Logger logger = LoggerFactory.getLogger(BooksController.class);
 
     private final BookService bookService;
     private final PersonService personService;
@@ -95,16 +99,16 @@ public class BooksController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/my-books")
     public String getMyBooks(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        System.out.println("DEBUG: Entering /my-books for user: " + userDetails.getUsername());
+        logger.debug("Entering /my-books for user: {}", userDetails.getUsername());
         Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
         if (currentUser == null) {
-            System.out.println("DEBUG: Current user not found for username: " + userDetails.getUsername());
+            logger.warn("Current user not found for username: {}", userDetails.getUsername());
             return "redirect:/auth/login?error=userNotFound";
         }
         List<Book> myBooks = bookService.getBooksByOwner(currentUser.getId());
-        System.out.println("DEBUG: Found " + myBooks.size() + " books for user " + currentUser.getUsername());
+        logger.debug("Found {} books for user {}", myBooks.size(), currentUser.getUsername());
         model.addAttribute("myBooks", myBooks);
-        System.out.println("DEBUG: Returning template books/my-books");
+        logger.debug("Returning template books/my-books");
         return "books/my-books";
     }
 
