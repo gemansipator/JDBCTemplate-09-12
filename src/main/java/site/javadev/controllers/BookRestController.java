@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -34,8 +35,9 @@ public class BookRestController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Book> getBookById(@PathVariable Long id) {
-        Book book = bookService.getBookById(id);
-        return book != null ? ResponseEntity.ok(book) : ResponseEntity.notFound().build();
+        Optional<Book> book = bookService.getBookById(id);
+        return book.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -46,7 +48,7 @@ public class BookRestController {
         Book book = new Book();
         book.setName((String) bookData.get("name"));
         book.setAuthor((String) bookData.get("author"));
-        book.setYearOfProduction((int) bookData.get("yearOfProduction"));
+        book.setYearOfProduction((Integer) bookData.get("yearOfProduction")); // Исправлено на Integer
         book.setAnnotation((String) bookData.get("annotation"));
 
         Book savedBook = bookService.saveBook(book, coverImage);
@@ -57,13 +59,13 @@ public class BookRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Book> updateBook(
             @PathVariable Long id,
-            @RequestPart("book") Map<String, Object> bookData, // Данные книги в виде Map
+            @RequestPart("book") Map<String, Object> bookData,
             @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
         Book book = new Book();
         book.setId(id);
         book.setName((String) bookData.get("name"));
         book.setAuthor((String) bookData.get("author"));
-        book.setYearOfProduction((int) bookData.get("yearOfProduction"));
+        book.setYearOfProduction((Integer) bookData.get("yearOfProduction")); // Исправлено на Integer
         book.setAnnotation((String) bookData.get("annotation"));
 
         Book updatedBook = bookService.saveBook(book, coverImage);
@@ -80,21 +82,17 @@ public class BookRestController {
     @GetMapping("/{id}/cover")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Resource> getBookCover(@PathVariable Long id) throws IOException {
-        Book book = bookService.getBookById(id);
-        if (book == null || book.getCoverImage() == null) {
+        Optional<Book> book = bookService.getBookById(id);
+        if (book.isEmpty() || book.get().getCoverImage() == null) {
             return ResponseEntity.notFound().build();
         }
-
-        String fileName = book.getCoverImage().substring("/uploads/covers/".length());
+        String fileName = book.get().getCoverImage().substring("/uploads/covers/".length());
         Path filePath = fileStorageService.getFilePath(fileName);
         Resource resource = new UrlResource(filePath.toUri());
-
         if (resource.exists() && resource.isReadable()) {
-            // Определяем тип контента по расширению файла
             String contentType = fileName.endsWith(".png") ? MediaType.IMAGE_PNG_VALUE :
                     fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") ? MediaType.IMAGE_JPEG_VALUE :
                             MediaType.APPLICATION_OCTET_STREAM_VALUE;
-
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .body(resource);
