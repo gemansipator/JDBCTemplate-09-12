@@ -1,5 +1,6 @@
 package site.javadev.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -17,15 +18,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
+@RequiredArgsConstructor
 public class BookRestController {
 
     private final BookService bookService;
     private final FileStorageService fileStorageService;
-
-    public BookRestController(BookService bookService, FileStorageService fileStorageService) {
-        this.bookService = bookService;
-        this.fileStorageService = fileStorageService;
-    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
