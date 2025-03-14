@@ -120,6 +120,13 @@ public class BooksController {
         return "books/manage-books-on-hand";
     }
 
+    /**
+     * Назначает книгу указанному пользователю. Доступно только администраторам.
+     *
+     * @param bookId   идентификатор книги, которую нужно назначить
+     * @param personId идентификатор пользователя, которому назначается книга
+     * @return перенаправление на страницу управления книгами (/books/manage)
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
@@ -127,6 +134,14 @@ public class BooksController {
         return "redirect:/books/manage";
     }
 
+    /**
+     * Позволяет пользователю взять книгу себе. Доступно только аутентифицированным пользователям.
+     *
+     * @param bookId      идентификатор книги, которую пользователь хочет взять
+     * @param userDetails данные текущего аутентифицированного пользователя
+     * @return перенаправление на страницу управления книгами (/books/manage),
+     *         либо на ту же страницу с ошибкой, если пользователь не найден
+     */
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/take/{id}")
     public String takeBook(@PathVariable("id") Long bookId, @AuthenticationPrincipal UserDetails userDetails) {
