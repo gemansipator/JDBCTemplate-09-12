@@ -48,7 +48,6 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-
     <!-- Thymeleaf Extras for Spring Security -->
     <dependency>
       <groupId>org.thymeleaf.extras</groupId>
@@ -118,10 +117,6 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
     </dependency>
   </dependencies>
 
