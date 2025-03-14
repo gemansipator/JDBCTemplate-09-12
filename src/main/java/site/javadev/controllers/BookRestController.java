@@ -15,10 +15,11 @@ import site.javadev.service.FileStorageService;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/books")
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Lombok аннотация для автоматического создания конструктора
 public class BookRestController {
 
     private final BookService bookService;
@@ -40,16 +41,13 @@ public class BookRestController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Book> createBook(
-            @RequestParam("name") String name,
-            @RequestParam("author") String author,
-            @RequestParam("yearOfProduction") int yearOfProduction,
-            @RequestParam(value = "annotation", defaultValue = "No annotation") String annotation,
-            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage) {
+            @RequestPart("book") Map<String, Object> bookData, // Данные книги в виде Map
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
         Book book = new Book();
-        book.setName(name);
-        book.setAuthor(author);
-        book.setYearOfProduction(yearOfProduction);
-        book.setAnnotation(annotation);
+        book.setName((String) bookData.get("name"));
+        book.setAuthor((String) bookData.get("author"));
+        book.setYearOfProduction((int) bookData.get("yearOfProduction"));
+        book.setAnnotation((String) bookData.get("annotation"));
 
         Book savedBook = bookService.saveBook(book, coverImage);
         return ResponseEntity.ok(savedBook);
@@ -59,17 +57,14 @@ public class BookRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Book> updateBook(
             @PathVariable Long id,
-            @RequestParam("name") String name,
-            @RequestParam("author") String author,
-            @RequestParam("yearOfProduction") int yearOfProduction,
-            @RequestParam(value = "annotation", defaultValue = "No annotation") String annotation,
-            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage) {
+            @RequestPart("book") Map<String, Object> bookData, // Данные книги в виде Map
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
         Book book = new Book();
         book.setId(id);
-        book.setName(name);
-        book.setAuthor(author);
-        book.setYearOfProduction(yearOfProduction);
-        book.setAnnotation(annotation);
+        book.setName((String) bookData.get("name"));
+        book.setAuthor((String) bookData.get("author"));
+        book.setYearOfProduction((int) bookData.get("yearOfProduction"));
+        book.setAnnotation((String) bookData.get("annotation"));
 
         Book updatedBook = bookService.saveBook(book, coverImage);
         return ResponseEntity.ok(updatedBook);
