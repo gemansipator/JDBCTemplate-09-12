@@ -12,8 +12,8 @@ public class PersonDetails implements UserDetails {
 
     private final Person person;
 
-    public PersonDetails(Person personSecurity) {
-        this.person = personSecurity;
+    public PersonDetails(Person person) {
+        this.person = person;
     }
 
     @Override
