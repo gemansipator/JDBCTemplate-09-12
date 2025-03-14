@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/books")
-@RequiredArgsConstructor // Lombok аннотация для автоматического создания конструктора
+@RequiredArgsConstructor
 public class BookRestController {
 
     private final BookService bookService;
@@ -41,7 +41,7 @@ public class BookRestController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Book> createBook(
-            @RequestPart("book") Map<String, Object> bookData, // Данные книги в виде Map
+            @RequestPart("book") Map<String, Object> bookData,
             @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
         Book book = new Book();
         book.setName((String) bookData.get("name"));
