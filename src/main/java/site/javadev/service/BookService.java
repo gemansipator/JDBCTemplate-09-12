@@ -9,6 +9,7 @@ import site.javadev.repositories.BookRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -32,8 +33,8 @@ public class BookService {
         return bookRepository.findByRemovedAtIsNull(); // Только активные книги
     }
 
-    public Book getBookById(Long id) {
-        return bookRepository.findById(id).orElse(null);
+    public Optional<Book> getBookById(Long id) {
+        return bookRepository.findById(id);
     }
 
     @Transactional

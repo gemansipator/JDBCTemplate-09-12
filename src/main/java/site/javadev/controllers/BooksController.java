@@ -16,6 +16,7 @@ import site.javadev.service.BookService;
 import site.javadev.service.PersonService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/books")
@@ -25,8 +26,6 @@ public class BooksController {
     private final BookService bookService;
     private final PersonService personService;
 
-
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public String getAllBooks(Model model) {
@@ -35,16 +34,16 @@ public class BooksController {
         return "books/view-with-all-books";
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Доступ для USER и ADMIN
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/{id}")
     public String getBookById(@PathVariable("id") Long id, Model model) {
-        Book bookById = bookService.getBookById(id);
-        if (bookById == null) {
+        Optional<Book> bookById = bookService.getBookById(id);
+        if (bookById.isEmpty()) {
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        model.addAttribute("keyBookById", bookById);
-        model.addAttribute("people", personService.getAllPersons()); // Оставляем для админов
+        model.addAttribute("keyBookById", bookById.get());
+        model.addAttribute("people", personService.getAllPersons());
         return "books/view-with-book-by-id";
     }
 
@@ -70,12 +69,12 @@ public class BooksController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) {
-        Book bookToBeEdited = bookService.getBookById(id);
-        if (bookToBeEdited == null) {
+        Optional<Book> bookToBeEdited = bookService.getBookById(id);
+        if (bookToBeEdited.isEmpty()) {
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        model.addAttribute("keyOfBookToBeEdited", bookToBeEdited);
+        model.addAttribute("keyOfBookToBeEdited", bookToBeEdited.get());
         return "books/view-to-edit-book";
     }
 
@@ -92,6 +91,7 @@ public class BooksController {
         bookService.saveBook(bookFromForm, coverFile);
         return "redirect:/books";
     }
+
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/my-books")
     public String getMyBooks(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -116,14 +116,14 @@ public class BooksController {
         return "books/manage-books-on-hand";
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')") // Только админы назначают любому человеку
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
         bookService.assignBook(bookId, personId);
         return "redirect:/books/manage";
     }
-    @PreAuthorize("hasRole('USER')") // Пользователи берут себе
+
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/take/{id}")
     public String takeBook(@PathVariable("id") Long bookId, @AuthenticationPrincipal UserDetails userDetails) {
         Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
