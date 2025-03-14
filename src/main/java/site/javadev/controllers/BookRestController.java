@@ -1,4 +1,4 @@
-package site.javadev.controller;
+package site.javadev.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
