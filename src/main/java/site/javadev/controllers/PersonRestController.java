@@ -33,7 +33,7 @@ public class PersonRestController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        personService.savePerson(person); // Проверяем, что метод существует и возвращает void
+        personService.savePerson(person);
         return ResponseEntity.ok(person);
     }
 
@@ -41,7 +41,7 @@ public class PersonRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person person) {
         person.setId(id);
-        personService.savePerson(person); // Аналогично
+        personService.savePerson(person);
         return ResponseEntity.ok(person);
     }
 
