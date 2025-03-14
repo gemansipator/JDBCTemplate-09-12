@@ -1,6 +1,8 @@
 package site.javadev.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BookService.class);
+
     private final BookRepository bookRepository;
     private final PersonService personService;
     private final FileStorageService fileStorageService;
@@ -27,7 +31,7 @@ public class BookService {
 
     @Transactional
     public List<Book> findAll() {
-        return bookRepository.findByRemovedAtIsNull(); // Только активные книги
+        return bookRepository.findByRemovedAtIsNull();
     }
 
     @Transactional
@@ -58,16 +62,26 @@ public class BookService {
             String fileName = book.getCoverImage().substring("/uploads/covers/".length());
             fileStorageService.deleteFile(fileName);
         }
-        bookRepository.delete(book); // Полное удаление
+        bookRepository.delete(book);
     }
 
     @Transactional
-    public void softDeleteBook(Long id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
-        book.setRemovedAt(LocalDateTime.now());
-        book.setRemovedPerson("system");
-        bookRepository.save(book); // Мягкое удаление
+    public boolean softDeleteBook(Long id) {
+        try {
+            Book book = bookRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
+            book.setRemovedAt(LocalDateTime.now());
+            book.setRemovedPerson("system");
+            bookRepository.save(book);
+            logger.info("Book with ID {} was soft deleted successfully", id);
+            return true;
+        } catch (IllegalArgumentException e) {
+            logger.error("Failed to soft delete book with ID {}: {}", id, e.getMessage());
+            return false;
+        } catch (Exception e) {
+            logger.error("Unexpected error while soft deleting book with ID {}: {}", id, e.getMessage());
+            return false;
+        }
     }
 
     @Transactional
@@ -91,7 +105,7 @@ public class BookService {
     }
 
     public List<Book> getAllDeletedBooks() {
-        return bookRepository.findByRemovedAtIsNotNull(); // Список удалённых книг
+        return bookRepository.findByRemovedAtIsNotNull();
     }
 
     @Transactional
@@ -100,6 +114,6 @@ public class BookService {
                 .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
         book.setRemovedAt(null);
         book.setRemovedPerson(null);
-        bookRepository.save(book); // Восстановление
+        bookRepository.save(book);
     }
 }

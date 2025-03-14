@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
 import site.javadev.service.BookService;
@@ -162,8 +163,12 @@ public class BooksController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/soft-delete/{id}")
-    public String softDeleteBook(@PathVariable("id") Long id) {
-        bookService.softDeleteBook(id);
+    public String softDeleteBook(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        boolean deleted = bookService.softDeleteBook(id);
+        if (!deleted) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Не удалось удалить книгу с ID: " + id);
+            return "redirect:/books/error-view";
+        }
         return "redirect:/books";
     }
 
