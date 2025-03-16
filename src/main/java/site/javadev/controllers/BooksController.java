@@ -2,6 +2,8 @@ package site.javadev.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,22 +12,24 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import site.javadev.model.Book;
 import site.javadev.model.Person;
 import site.javadev.service.BookService;
 import site.javadev.service.PersonService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/books")
 @RequiredArgsConstructor
 public class BooksController {
 
+    private static final Logger logger = LoggerFactory.getLogger(BooksController.class);
+
     private final BookService bookService;
     private final PersonService personService;
-
-
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
@@ -35,16 +39,16 @@ public class BooksController {
         return "books/view-with-all-books";
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Доступ для USER и ADMIN
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/{id}")
     public String getBookById(@PathVariable("id") Long id, Model model) {
-        Book bookById = bookService.getBookById(id);
-        if (bookById == null) {
+        Optional<Book> bookById = bookService.getBookById(id);
+        if (bookById.isEmpty()) {
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        model.addAttribute("keyBookById", bookById);
-        model.addAttribute("people", personService.getAllPersons()); // Оставляем для админов
+        model.addAttribute("keyBookById", bookById.get());
+        model.addAttribute("people", personService.getAllPersons());
         return "books/view-with-book-by-id";
     }
 
@@ -70,12 +74,12 @@ public class BooksController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) {
-        Book bookToBeEdited = bookService.getBookById(id);
-        if (bookToBeEdited == null) {
+        Optional<Book> bookToBeEdited = bookService.getBookById(id);
+        if (bookToBeEdited.isEmpty()) {
             model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
-        model.addAttribute("keyOfBookToBeEdited", bookToBeEdited);
+        model.addAttribute("keyOfBookToBeEdited", bookToBeEdited.get());
         return "books/view-to-edit-book";
     }
 
@@ -92,19 +96,20 @@ public class BooksController {
         bookService.saveBook(bookFromForm, coverFile);
         return "redirect:/books";
     }
+
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/my-books")
     public String getMyBooks(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        System.out.println("DEBUG: Entering /my-books for user: " + userDetails.getUsername());
+        logger.debug("Entering /my-books for user: {}", userDetails.getUsername());
         Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
         if (currentUser == null) {
-            System.out.println("DEBUG: Current user not found for username: " + userDetails.getUsername());
+            logger.warn("Current user not found for username: {}", userDetails.getUsername());
             return "redirect:/auth/login?error=userNotFound";
         }
         List<Book> myBooks = bookService.getBooksByOwner(currentUser.getId());
-        System.out.println("DEBUG: Found " + myBooks.size() + " books for user " + currentUser.getUsername());
+        logger.debug("Found {} books for user {}", myBooks.size(), currentUser.getUsername());
         model.addAttribute("myBooks", myBooks);
-        System.out.println("DEBUG: Returning template books/my-books");
+        logger.debug("Returning template books/my-books");
         return "books/my-books";
     }
 
@@ -116,14 +121,29 @@ public class BooksController {
         return "books/manage-books-on-hand";
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')") // Только админы назначают любому человеку
+    /**
+     * Назначает книгу указанному пользователю. Доступно только администраторам.
+     *
+     * @param bookId   идентификатор книги, которую нужно назначить
+     * @param personId идентификатор пользователя, которому назначается книга
+     * @return перенаправление на страницу управления книгами (/books/manage)
+     */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
         bookService.assignBook(bookId, personId);
         return "redirect:/books/manage";
     }
-    @PreAuthorize("hasRole('USER')") // Пользователи берут себе
+
+    /**
+     * Позволяет пользователю взять книгу себе. Доступно только аутентифицированным пользователям.
+     *
+     * @param bookId      идентификатор книги, которую пользователь хочет взять
+     * @param userDetails данные текущего аутентифицированного пользователя
+     * @return перенаправление на страницу управления книгами (/books/manage),
+     *         либо на ту же страницу с ошибкой, если пользователь не найден
+     */
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/take/{id}")
     public String takeBook(@PathVariable("id") Long bookId, @AuthenticationPrincipal UserDetails userDetails) {
         Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
@@ -143,8 +163,12 @@ public class BooksController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/soft-delete/{id}")
-    public String softDeleteBook(@PathVariable("id") Long id) {
-        bookService.softDeleteBook(id);
+    public String softDeleteBook(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        boolean deleted = bookService.softDeleteBook(id);
+        if (!deleted) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Не удалось удалить книгу с ID: " + id);
+            return "redirect:/books/error-view";
+        }
         return "redirect:/books";
     }
 

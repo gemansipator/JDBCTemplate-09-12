@@ -43,6 +43,7 @@ public class FileStorageService {
     public Path getFilePath(String fileName) {
         return uploadPath.resolve(fileName); // Возвращаем полный путь к файлу
     }
+
     public boolean deleteFile(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             return false; // Если имя файла пустое, ничего не делаем
