@@ -14,7 +14,7 @@ public class Application {
     // Основной метод запуска приложения.
     public static void main(String[] args) {
         // SpringApplication.run() запускает приложение Spring Boot, создавая и настраивая контекст приложения.
-        // Это метод, который находит ваш @SpringBootApplication класс и запускает встроенный сервер.
+        // Это метод, который находит ваш @SpringBootApplication класс и запускает встроенный сервер
         SpringApplication.run(Application.class, args);
     }
 
