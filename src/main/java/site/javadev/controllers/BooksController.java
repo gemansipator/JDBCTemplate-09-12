@@ -1,8 +1,10 @@
-package site.javadev.controller;
+package site.javadev.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,7 +15,6 @@ import site.javadev.model.Person;
 import site.javadev.service.BookService;
 import site.javadev.service.PersonService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -24,17 +25,27 @@ public class BooksController {
     private final BookService bookService;
     private final PersonService personService;
 
+
+
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public String getAllBooks(Model model) {
-        try {
-            List<Book> allBooks = bookService.findAll();
-            model.addAttribute("keyAllBooks", allBooks);
-            return "books/view-with-all-books";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Ошибка при загрузке данных");
+        List<Book> allBooks = bookService.findAll();
+        model.addAttribute("keyAllBooks", allBooks);
+        return "books/view-with-all-books";
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Доступ для USER и ADMIN
+    @GetMapping("/{id}")
+    public String getBookById(@PathVariable("id") Long id, Model model) {
+        Book bookById = bookService.getBookById(id);
+        if (bookById == null) {
+            model.addAttribute("errorMessage", "Книга не найдена");
             return "books/error-view";
         }
+        model.addAttribute("keyBookById", bookById);
+        model.addAttribute("people", personService.getAllPersons()); // Оставляем для админов
+        return "books/view-with-book-by-id";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -44,54 +55,16 @@ public class BooksController {
         return "books/view-to-create-new-book";
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @GetMapping("/manage")
-    public String manageBooksOnHand(Model model) {
-        model.addAttribute("allBooks", bookService.findAll());
-        model.addAttribute("allPeople", personService.getAllPersons());
-        return "books/manage-books-on-hand";
-    }
-
-    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
     public String createBook(@ModelAttribute("keyOfNewBook") @Valid Book book,
                              BindingResult bindingResult,
                              @RequestParam("coverFile") MultipartFile coverFile) {
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(error -> System.out.println(error.toString()));
             return "books/view-to-create-new-book";
         }
-        try {
-            System.out.println("Creating book: " + book);
-            System.out.println("Cover file: " + (coverFile.isEmpty() ? "empty" : coverFile.getOriginalFilename()));
-            if (book.getAnnotation() == null) {
-                book.setAnnotation("No annotation");
-            }
-            if (book.getCreatedAt() == null) {
-                book.setCreatedAt(LocalDateTime.now());
-            }
-            if (book.getCreatedPerson() == null) {
-                book.setCreatedPerson("system");
-            }
-            bookService.saveBook(book, coverFile);
-            return "redirect:/books";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "books/error-view";
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}")
-    public String getBookById(@PathVariable("id") Long id, Model model) {
-        Book bookById = bookService.getBookById(id);
-        if (bookById == null) {
-            model.addAttribute("errorMessage", "Книга не найдена");
-            return "books/error-view";
-        }
-        model.addAttribute("keyBookById", bookById);
-        model.addAttribute("people", personService.getAllPersons());
-        return "books/view-with-book-by-id";
+        bookService.saveBook(book, coverFile);
+        return "redirect:/books";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -116,16 +89,62 @@ public class BooksController {
             return "books/view-to-edit-book";
         }
         bookFromForm.setId(id);
-        if (bookFromForm.getAnnotation() == null) {
-            bookFromForm.setAnnotation("No annotation");
-        }
-        if (bookFromForm.getCreatedAt() == null) {
-            bookFromForm.setCreatedAt(LocalDateTime.now());
-        }
-        if (bookFromForm.getCreatedPerson() == null) {
-            bookFromForm.setCreatedPerson("system");
-        }
         bookService.saveBook(bookFromForm, coverFile);
+        return "redirect:/books";
+    }
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping("/my-books")
+    public String getMyBooks(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        System.out.println("DEBUG: Entering /my-books for user: " + userDetails.getUsername());
+        Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
+        if (currentUser == null) {
+            System.out.println("DEBUG: Current user not found for username: " + userDetails.getUsername());
+            return "redirect:/auth/login?error=userNotFound";
+        }
+        List<Book> myBooks = bookService.getBooksByOwner(currentUser.getId());
+        System.out.println("DEBUG: Found " + myBooks.size() + " books for user " + currentUser.getUsername());
+        model.addAttribute("myBooks", myBooks);
+        System.out.println("DEBUG: Returning template books/my-books");
+        return "books/my-books";
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping("/manage")
+    public String manageBooksOnHand(Model model) {
+        model.addAttribute("allBooks", bookService.findAll());
+        model.addAttribute("allPeople", personService.getAllPersons());
+        return "books/manage-books-on-hand";
+    }
+
+
+    @PreAuthorize("hasRole('ADMIN')") // Только админы назначают любому человеку
+    @PostMapping("/assign/{id}")
+    public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
+        bookService.assignBook(bookId, personId);
+        return "redirect:/books/manage";
+    }
+    @PreAuthorize("hasRole('USER')") // Пользователи берут себе
+    @PostMapping("/take/{id}")
+    public String takeBook(@PathVariable("id") Long bookId, @AuthenticationPrincipal UserDetails userDetails) {
+        Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
+        if (currentUser == null) {
+            return "redirect:/books/manage?error=userNotFound";
+        }
+        bookService.assignBook(bookId, currentUser.getId());
+        return "redirect:/books/manage";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/loose/{id}")
+    public String looseBook(@PathVariable("id") Long bookId) {
+        bookService.looseBook(bookId);
+        return "redirect:/books/manage";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/soft-delete/{id}")
+    public String softDeleteBook(@PathVariable("id") Long id) {
+        bookService.softDeleteBook(id);
         return "redirect:/books";
     }
 
@@ -137,16 +156,17 @@ public class BooksController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/assign/{id}")
-    public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
-        bookService.assignBook(bookId, personId);
-        return "redirect:/books/manage";
+    @GetMapping("/deleted")
+    public String getAllDeletedBooks(Model model) {
+        List<Book> deletedBooks = bookService.getAllDeletedBooks();
+        model.addAttribute("keyAllDeletedBooks", deletedBooks);
+        return "books/view-with-deleted-books";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/loose/{id}")
-    public String looseBook(@PathVariable("id") Long bookId) {
-        bookService.looseBook(bookId);
-        return "redirect:/books/manage";
+    @PostMapping("/restore/{id}")
+    public String restoreBook(@PathVariable("id") Long id) {
+        bookService.restoreBook(id);
+        return "redirect:/books/deleted";
     }
 }
