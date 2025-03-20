@@ -69,20 +69,20 @@ public class BookService {
     public boolean softDeleteBook(Long id) {
         try {
             Book book = bookRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
+                    .orElseThrow(() -> new IllegalArgumentException("Book with ID " + id + " not found"));
+
             book.setRemovedAt(LocalDateTime.now());
             book.setRemovedPerson("system");
             bookRepository.save(book);
-            log.info("Book with ID {} was soft deleted successfully", id);
+
+            log.info("Book with ID {} was successfully soft deleted by {}", id, "system");
             return true;
         } catch (IllegalArgumentException e) {
-            log.error("Failed to soft delete book with ID {}: {}", id, e.getMessage());
-            return false;
-        } catch (Exception e) {
-            log.error("Unexpected error while soft deleting book with ID {}: {}", id, e.getMessage());
+            log.error("Soft delete failed: {}", e.getMessage());
             return false;
         }
     }
+
 
     @Transactional
     public void assignBook(Long bookId, Long personId) {
