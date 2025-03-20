@@ -48,7 +48,7 @@ public class BookRestController {
         Book book = new Book();
         book.setName((String) bookData.get("name"));
         book.setAuthor((String) bookData.get("author"));
-        book.setYearOfProduction((Integer) bookData.get("yearOfProduction")); // Исправлено на Integer
+        book.setYearOfProduction((Integer) bookData.get("yearOfProduction"));
         book.setAnnotation((String) bookData.get("annotation"));
 
         Book savedBook = bookService.saveBook(book, coverImage);
