@@ -2,8 +2,7 @@ package site.javadev.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,12 +20,11 @@ import site.javadev.service.PersonService;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Controller
 @RequestMapping("/books")
 @RequiredArgsConstructor
 public class BooksController {
-
-    private static final Logger logger = LoggerFactory.getLogger(BooksController.class);
 
     private final BookService bookService;
     private final PersonService personService;
@@ -100,16 +98,16 @@ public class BooksController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/my-books")
     public String getMyBooks(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        logger.debug("Entering /my-books for user: {}", userDetails.getUsername());
+        log.debug("Entering /my-books for user: {}", userDetails.getUsername());
         Person currentUser = personService.getPersonByUsername(userDetails.getUsername());
         if (currentUser == null) {
-            logger.warn("Current user not found for username: {}", userDetails.getUsername());
+            log.warn("Current user not found for username: {}", userDetails.getUsername());
             return "redirect:/auth/login?error=userNotFound";
         }
         List<Book> myBooks = bookService.getBooksByOwner(currentUser.getId());
-        logger.debug("Found {} books for user {}", myBooks.size(), currentUser.getUsername());
+        log.debug("Found {} books for user {}", myBooks.size(), currentUser.getUsername());
         model.addAttribute("myBooks", myBooks);
-        logger.debug("Returning template books/my-books");
+        log.debug("Returning template books/my-books");
         return "books/my-books";
     }
 
@@ -121,13 +119,6 @@ public class BooksController {
         return "books/manage-books-on-hand";
     }
 
-    /**
-     * Назначает книгу указанному пользователю. Доступно только администраторам.
-     *
-     * @param bookId   идентификатор книги, которую нужно назначить
-     * @param personId идентификатор пользователя, которому назначается книга
-     * @return перенаправление на страницу управления книгами (/books/manage)
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assign/{id}")
     public String assignBook(@PathVariable("id") Long bookId, @RequestParam("personId") Long personId) {
@@ -135,14 +126,6 @@ public class BooksController {
         return "redirect:/books/manage";
     }
 
-    /**
-     * Позволяет пользователю взять книгу себе. Доступно только аутентифицированным пользователям.
-     *
-     * @param bookId      идентификатор книги, которую пользователь хочет взять
-     * @param userDetails данные текущего аутентифицированного пользователя
-     * @return перенаправление на страницу управления книгами (/books/manage),
-     *         либо на ту же страницу с ошибкой, если пользователь не найден
-     */
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/take/{id}")
     public String takeBook(@PathVariable("id") Long bookId, @AuthenticationPrincipal UserDetails userDetails) {
