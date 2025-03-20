@@ -33,8 +33,8 @@ public class PersonRestController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        personService.savePerson(person);
-        return ResponseEntity.ok(person);
+        Person savedPerson = personService.savePerson(person);
+        return ResponseEntity.ok(savedPerson);
     }
 
     @PutMapping("/{id}")
@@ -42,7 +42,8 @@ public class PersonRestController {
     public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person person) {
         person.setId(id);
         personService.savePerson(person);
-        return ResponseEntity.ok(person);
+        Person updatedPerson = personService.getPersonById(id);
+        return updatedPerson != null ? ResponseEntity.ok(updatedPerson) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")

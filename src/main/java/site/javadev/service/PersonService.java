@@ -19,12 +19,8 @@ public class PersonService {
     private final PersonRepository personRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * Сохраняет нового пользователя в базе данных.
-     * Первый зарегистрированный пользователь получает роль ADMIN, остальные — USER.
-     */
     @Transactional
-    public void savePerson(Person person) {
+    public Person savePerson(Person person) {
         try {
             System.out.println("Saving person: " + person.getUsername());
 
@@ -45,8 +41,10 @@ public class PersonService {
                 person.setCreatedPerson("system");
             }
 
-            personRepository.save(person);
-            System.out.println("Person saved: " + person.getUsername());
+            Person savedPerson = personRepository.save(person);
+            System.out.println("Person saved: " + savedPerson.getUsername());
+
+            return savedPerson; // Теперь метод возвращает сохраненный объект
         } catch (Exception e) {
             System.out.println("Error saving person: " + e.getMessage());
             e.printStackTrace();
@@ -54,9 +52,6 @@ public class PersonService {
         }
     }
 
-    /**
-     * Изменяет роль пользователя (доступно только администратору).
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void changeUserRole(String username, String role) {
@@ -66,42 +61,25 @@ public class PersonService {
         personRepository.save(person);
     }
 
-    /**
-     * Возвращает список всех активных пользователей (не удалённых).
-     */
     public List<Person> getAllPersons() {
         return personRepository.findByRemovedAtIsNull();
     }
 
-    /**
-     * Возвращает список всех удалённых пользователей (доступно только администратору).
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public List<Person> getAllDeletedPersons() {
         return personRepository.findByRemovedAtIsNotNull();
     }
 
-    /**
-     * Получает пользователя по ID. Если пользователь не найден, выбрасывает исключение.
-     */
     public Person getPersonById(Long id) {
         return personRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Person not found with id: " + id));
     }
 
-    /**
-     * Получает пользователя по имени пользователя (username).
-     * Используется для аутентификации и назначения книг текущему пользователю.
-     */
     public Person getPersonByUsername(String username) {
         return personRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
     }
 
-    /**
-     * Удаляет пользователя (мягкое удаление, устанавливает removedAt и removedPerson).
-     * Доступно только администратору.
-     */
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void deletePerson(Long id) {
@@ -111,10 +89,6 @@ public class PersonService {
         personRepository.save(person);
     }
 
-    /**
-     * Восстанавливает удалённого пользователя (очищает removedAt и removedPerson).
-     * Доступно только администратору.
-     */
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void restorePerson(Long id) {
