@@ -1,6 +1,7 @@
 package site.javadev.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookService {
-
-    private static final Logger logger = LoggerFactory.getLogger(BookService.class);
 
     private final BookRepository bookRepository;
     private final PersonService personService;
@@ -73,13 +73,13 @@ public class BookService {
             book.setRemovedAt(LocalDateTime.now());
             book.setRemovedPerson("system");
             bookRepository.save(book);
-            logger.info("Book with ID {} was soft deleted successfully", id);
+            log.info("Book with ID {} was soft deleted successfully", id);
             return true;
         } catch (IllegalArgumentException e) {
-            logger.error("Failed to soft delete book with ID {}: {}", id, e.getMessage());
+            log.error("Failed to soft delete book with ID {}: {}", id, e.getMessage());
             return false;
         } catch (Exception e) {
-            logger.error("Unexpected error while soft deleting book with ID {}: {}", id, e.getMessage());
+            log.error("Unexpected error while soft deleting book with ID {}: {}", id, e.getMessage());
             return false;
         }
     }
