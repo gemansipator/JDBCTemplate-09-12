@@ -1,5 +1,6 @@
 package site.javadev.controllers;
 
+import lombok.AllArgsConstructor;
 import site.javadev.model.Person;
 import site.javadev.service.PersonService;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +11,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/people")
+@AllArgsConstructor
 public class PersonRestController {
     private final PersonService personService;
-
-    public PersonRestController(PersonService personService) {
-        this.personService = personService;
-    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
