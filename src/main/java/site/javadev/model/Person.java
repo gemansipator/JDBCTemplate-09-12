@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "books")
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,18 +48,30 @@ public class Person {
     @Column(name = "role", nullable = false)
     private String role = "ROLE_USER";
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "removed_at")
     private LocalDateTime removedAt;
 
-    @Column(name = "created_person", nullable = false)
+    @Column(name = "created_person", nullable = false, updatable = false)
     private String createdPerson = "system";
 
     @Column(name = "removed_person")
     private String removedPerson;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books;
+
+    public void updateFrom(Person source) {
+        this.name = source.getName();
+        this.age = source.getAge();
+        this.email = source.getEmail();
+        this.phoneNumber = source.getPhoneNumber();
+        this.username = source.getUsername();
+        this.password = source.getPassword();
+        this.role = source.getRole();
+        this.removedAt = source.getRemovedAt();
+        this.removedPerson = source.getRemovedPerson();
+    }
 }
