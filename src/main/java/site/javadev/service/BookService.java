@@ -40,9 +40,9 @@ public class BookService {
     }
 
     @Transactional
-    public Book saveBook(Book book, MultipartFile coverImage) {
-        if (coverImage != null && !coverImage.isEmpty()) {
-            String coverImagePath = fileStorageService.storeFile(coverImage);
+    public Book saveBook(Book book, MultipartFile imagePath) {
+        if (imagePath != null && !imagePath.isEmpty()) {
+            String coverImagePath = fileStorageService.storeFile(imagePath);
             book.setCoverImage(coverImagePath);
         }
         if (book.getCreatedAt() == null) {

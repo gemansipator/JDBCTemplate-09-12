@@ -24,16 +24,13 @@ public class PersonService {
         try {
             System.out.println("Saving person: " + person.getUsername());
 
-            // Определяем роль: первый пользователь — ADMIN, остальные — USER
             boolean isFirstUser = personRepository.count() == 0;
             person.setRole(isFirstUser ? "ROLE_ADMIN" : "ROLE_USER");
 
-            // Шифруем пароль, если он задан
             if (person.getPassword() != null) {
                 person.setPassword(passwordEncoder.encode(person.getPassword()));
             }
 
-            // Устанавливаем метаданные создания, если они не заданы
             if (person.getCreatedAt() == null) {
                 person.setCreatedAt(LocalDateTime.now());
             }
