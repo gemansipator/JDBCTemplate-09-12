@@ -42,11 +42,14 @@ public class PersonService {
 
             Person savedPerson = personRepository.save(person);
             log.info("Person saved: {}", savedPerson.getUsername());
-
             return savedPerson;
+
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.error("Database constraint violation while saving person: {}", person.getUsername(), e);
+            throw new IllegalArgumentException("Пользователь с таким именем уже существует", e);
         } catch (Exception e) {
-            log.error("Error saving person: {}", e.getMessage(), e);
-            throw e;
+            log.error("Unexpected error while saving person: {}", person.getUsername(), e);
+            throw new RuntimeException("Не удалось сохранить пользователя из-за внутренней ошибки", e);
         }
     }
 
