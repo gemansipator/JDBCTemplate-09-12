@@ -1,6 +1,7 @@
 package site.javadev.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PersonService {
 
     private final PersonRepository personRepository;
@@ -22,7 +24,7 @@ public class PersonService {
     @Transactional
     public Person savePerson(Person person) {
         try {
-            System.out.println("Saving person: " + person.getUsername());
+            log.info("Saving person: {}", person.getUsername());
 
             boolean isFirstUser = personRepository.count() == 0;
             person.setRole(isFirstUser ? "ROLE_ADMIN" : "ROLE_USER");
@@ -39,12 +41,11 @@ public class PersonService {
             }
 
             Person savedPerson = personRepository.save(person);
-            System.out.println("Person saved: " + savedPerson.getUsername());
+            log.info("Person saved: {}", savedPerson.getUsername());
 
-            return savedPerson; // Теперь метод возвращает сохраненный объект
+            return savedPerson;
         } catch (Exception e) {
-            System.out.println("Error saving person: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error saving person: {}", e.getMessage(), e);
             throw e;
         }
     }
