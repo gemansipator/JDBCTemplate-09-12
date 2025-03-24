@@ -104,6 +104,7 @@ public class BookService {
         bookRepository.save(book);
     }
 
+    @Transactional
     public List<Book> getAllDeletedBooks() {
         return bookRepository.findByRemovedAtIsNotNull();
     }
