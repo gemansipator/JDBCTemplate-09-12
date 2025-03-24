@@ -1,5 +1,9 @@
 package site.javadev.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,37 +13,36 @@ import site.javadev.repositories.BookRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
     private final PersonService personService;
     private final FileStorageService fileStorageService;
 
-    public BookService(BookRepository bookRepository, PersonService personService, FileStorageService fileStorageService) {
-        this.bookRepository = bookRepository;
-        this.personService = personService;
-        this.fileStorageService = fileStorageService;
-    }
-
-
+    @Transactional
     public List<Book> getBooksByOwner(Long personId) {
         return bookRepository.findByOwnerIdAndRemovedAtIsNull(personId);
     }
 
+    @Transactional
     public List<Book> findAll() {
-        return bookRepository.findByRemovedAtIsNull(); // Только активные книги
-    }
-
-    public Book getBookById(Long id) {
-        return bookRepository.findById(id).orElse(null);
+        return bookRepository.findByRemovedAtIsNull();
     }
 
     @Transactional
-    public Book saveBook(Book book, MultipartFile coverImage) {
-        if (coverImage != null && !coverImage.isEmpty()) {
-            String coverImagePath = fileStorageService.storeFile(coverImage);
+    public Optional<Book> getBookById(Long id) {
+        return bookRepository.findById(id);
+    }
+
+    @Transactional
+    public Book saveBook(Book book, MultipartFile imagePath) {
+        if (imagePath != null && !imagePath.isEmpty()) {
+            String coverImagePath = fileStorageService.storeFile(imagePath);
             book.setCoverImage(coverImagePath);
         }
         if (book.getCreatedAt() == null) {
@@ -59,17 +62,27 @@ public class BookService {
             String fileName = book.getCoverImage().substring("/uploads/covers/".length());
             fileStorageService.deleteFile(fileName);
         }
-        bookRepository.delete(book); // Полное удаление
+        bookRepository.delete(book);
     }
 
     @Transactional
-    public void softDeleteBook(Long id) {
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
-        book.setRemovedAt(LocalDateTime.now());
-        book.setRemovedPerson("system");
-        bookRepository.save(book); // Мягкое удаление
+    public boolean softDeleteBook(Long id) {
+        try {
+            Book book = bookRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Book with ID " + id + " not found"));
+
+            book.setRemovedAt(LocalDateTime.now());
+            book.setRemovedPerson("system");
+            bookRepository.save(book);
+
+            log.info("Book with ID {} was successfully soft deleted by {}", id, "system");
+            return true;
+        } catch (IllegalArgumentException e) {
+            log.error("Soft delete failed: {}", e.getMessage());
+            return false;
+        }
     }
+
 
     @Transactional
     public void assignBook(Long bookId, Long personId) {
@@ -91,8 +104,9 @@ public class BookService {
         bookRepository.save(book);
     }
 
+    @Transactional
     public List<Book> getAllDeletedBooks() {
-        return bookRepository.findByRemovedAtIsNotNull(); // Список удалённых книг
+        return bookRepository.findByRemovedAtIsNotNull();
     }
 
     @Transactional
@@ -101,6 +115,6 @@ public class BookService {
                 .orElseThrow(() -> new IllegalArgumentException("Book not found: " + id));
         book.setRemovedAt(null);
         book.setRemovedPerson(null);
-        bookRepository.save(book); // Восстановление
+        bookRepository.save(book);
     }
 }

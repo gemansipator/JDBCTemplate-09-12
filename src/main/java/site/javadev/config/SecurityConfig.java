@@ -1,5 +1,6 @@
 package site.javadev.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,15 +19,11 @@ import site.javadev.security.PersonDetailsService;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final PersonDetailsService personDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    public SecurityConfig(PersonDetailsService personDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.personDetailsService = personDetailsService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

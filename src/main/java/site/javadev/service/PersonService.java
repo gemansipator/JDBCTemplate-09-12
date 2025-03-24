@@ -1,6 +1,7 @@
 package site.javadev.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,30 +15,24 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PersonService {
 
     private final PersonRepository personRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * Сохраняет нового пользователя в базе данных.
-     * Первый зарегистрированный пользователь получает роль ADMIN, остальные — USER.
-     */
     @Transactional
-    public void savePerson(Person person) {
+    public Person savePerson(Person person) {
         try {
-            System.out.println("Saving person: " + person.getUsername());
+            log.info("Saving person: {}", person.getUsername());
 
-            // Определяем роль: первый пользователь — ADMIN, остальные — USER
             boolean isFirstUser = personRepository.count() == 0;
             person.setRole(isFirstUser ? "ROLE_ADMIN" : "ROLE_USER");
 
-            // Шифруем пароль, если он задан
             if (person.getPassword() != null) {
                 person.setPassword(passwordEncoder.encode(person.getPassword()));
             }
 
-            // Устанавливаем метаданные создания, если они не заданы
             if (person.getCreatedAt() == null) {
                 person.setCreatedAt(LocalDateTime.now());
             }
@@ -45,18 +40,19 @@ public class PersonService {
                 person.setCreatedPerson("system");
             }
 
-            personRepository.save(person);
-            System.out.println("Person saved: " + person.getUsername());
+            Person savedPerson = personRepository.save(person);
+            log.info("Person saved: {}", savedPerson.getUsername());
+            return savedPerson;
+
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            log.error("Database constraint violation while saving person: {}", person.getUsername(), e);
+            throw new IllegalArgumentException("Пользователь с таким именем уже существует", e);
         } catch (Exception e) {
-            System.out.println("Error saving person: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            log.error("Unexpected error while saving person: {}", person.getUsername(), e);
+            throw new RuntimeException("Не удалось сохранить пользователя из-за внутренней ошибки", e);
         }
     }
 
-    /**
-     * Изменяет роль пользователя (доступно только администратору).
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void changeUserRole(String username, String role) {
@@ -66,42 +62,25 @@ public class PersonService {
         personRepository.save(person);
     }
 
-    /**
-     * Возвращает список всех активных пользователей (не удалённых).
-     */
     public List<Person> getAllPersons() {
         return personRepository.findByRemovedAtIsNull();
     }
 
-    /**
-     * Возвращает список всех удалённых пользователей (доступно только администратору).
-     */
     @PreAuthorize("hasRole('ADMIN')")
     public List<Person> getAllDeletedPersons() {
         return personRepository.findByRemovedAtIsNotNull();
     }
 
-    /**
-     * Получает пользователя по ID. Если пользователь не найден, выбрасывает исключение.
-     */
     public Person getPersonById(Long id) {
         return personRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Person not found with id: " + id));
     }
 
-    /**
-     * Получает пользователя по имени пользователя (username).
-     * Используется для аутентификации и назначения книг текущему пользователю.
-     */
     public Person getPersonByUsername(String username) {
         return personRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
     }
 
-    /**
-     * Удаляет пользователя (мягкое удаление, устанавливает removedAt и removedPerson).
-     * Доступно только администратору.
-     */
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void deletePerson(Long id) {
@@ -111,10 +90,6 @@ public class PersonService {
         personRepository.save(person);
     }
 
-    /**
-     * Восстанавливает удалённого пользователя (очищает removedAt и removedPerson).
-     * Доступно только администратору.
-     */
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void restorePerson(Long id) {

@@ -56,7 +56,7 @@ public class AuthController {
         Cookie jwtCookie = new Cookie("jwtToken", jwt);
         jwtCookie.setHttpOnly(true);
         jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(3600); // 1 час
+        jwtCookie.setMaxAge(3600); //  1 час
         response.addCookie(jwtCookie);
 
         return "redirect:/books";

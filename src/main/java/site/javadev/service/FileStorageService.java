@@ -18,7 +18,7 @@ public class FileStorageService {
     public FileStorageService() {
         this.uploadPath = Paths.get(UPLOAD_DIR);
         try {
-            Files.createDirectories(uploadPath); // Создаем директорию, если ее нет
+            Files.createDirectories(uploadPath);
             System.out.println("Upload directory initialized at: " + uploadPath.toAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("Не удалось создать директорию для загрузки файлов: " + UPLOAD_DIR, e);
@@ -27,29 +27,30 @@ public class FileStorageService {
 
     public String storeFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            return null; // Возвращаем null, если файл не передан
+            return null;
         }
         try {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath);
             System.out.println("File saved at: " + filePath.toAbsolutePath());
-            return "/uploads/covers/" + fileName; // Относительный URL
+            return "/uploads/covers/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Не удалось сохранить файл: " + file.getOriginalFilename(), e);
         }
     }
 
     public Path getFilePath(String fileName) {
-        return uploadPath.resolve(fileName); // Возвращаем полный путь к файлу
+        return uploadPath.resolve(fileName);
     }
+
     public boolean deleteFile(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
-            return false; // Если имя файла пустое, ничего не делаем
+            return false;
         }
         try {
             Path filePath = uploadPath.resolve(fileName);
-            return Files.deleteIfExists(filePath); // Удаляем файл, если он существует
+            return Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("Не удалось удалить файл: " + fileName, e);
         }
